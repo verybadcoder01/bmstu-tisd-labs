@@ -14,7 +14,9 @@ enum input_errors {
     WRONG_DECIMAL_INPUT = 2,
     NOT_A_NUMBER_INPUT = 3,
     WRONG_SIGN = 4,
-    DIVISION_BY_ZERO = 5
+    DIVISION_BY_ZERO = 5,
+    EXPONENT_OVERFLOW = 6,
+    EXPONENT_UNDERFLOW = 7
 };
 
 #endif

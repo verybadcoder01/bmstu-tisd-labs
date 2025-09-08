@@ -18,14 +18,6 @@ typedef struct {
     int mantis_sign;
 } big_decimal;
 
-error str_to_int(const char *str, int *result);
-
-error input_big_decimal(big_decimal *result);
-
-error input_big_integer(big_integer *result);
-
-void print_big_decimal(big_decimal *data);
-
 void init_big_decimal_zero(big_decimal *num);
 
 int is_zero_decimal(const big_decimal *num);
@@ -36,13 +28,13 @@ void add_digit_to_end(int *num, int size, int digit);
 
 void normalize(big_decimal *num);
 
-void leading_zeros_to_exponent(big_decimal *num);
+error leading_zeros_to_exponent(big_decimal *num);
 
-void round_big_decimal(big_decimal *num, int new_digit);
+error round_big_decimal(big_decimal *num, int new_digit);
 
-void shift_right(big_decimal *num, int places);
+error shift_right(big_decimal *num, int places);
 
-void shift_left(big_decimal *num, int places);
+error shift_left(big_decimal *num, int places);
 
 void reverse_array(int *arr, int size);
 

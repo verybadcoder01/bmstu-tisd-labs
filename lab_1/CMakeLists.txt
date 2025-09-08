@@ -10,6 +10,7 @@ set(SOURCES
         main.c
         long_division.c
         long_numbers.c
+        long_numbers_io.c
 )
 
 # List all header files
@@ -17,6 +18,7 @@ set(HEADERS
         constants.h
         long_numbers.h
         long_division.h
+        long_numbers_io.h
 )
 
 # Create executable

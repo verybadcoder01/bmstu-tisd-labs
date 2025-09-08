@@ -15,7 +15,10 @@ error divide_by_big_decimal(const big_integer *a, const big_decimal *b, big_deci
     big_decimal b_copy = *b;
     b_copy.mantis_sign = 1;
     init_big_decimal_zero(result);
-    shift_left(&b_copy, b_copy.after_point_count);
+    error rc = shift_left(&b_copy, b_copy.after_point_count);
+    if (rc){
+        return rc;
+    }
     result->exponent = -b_copy.exponent;
     b_copy.exponent = 0;
     big_integer part_divide;
@@ -58,19 +61,20 @@ error divide_by_big_decimal(const big_integer *a, const big_decimal *b, big_deci
         sub_from_divident.dig_count = 0;
         sub_from_divident.sign = 1;
         mult_big_integer_digit(&b_integer, i, &sub_from_divident);
-        if (write_before_point){
-            if (result->before_point_count + result->after_point_count == MAX_MANTISS_LENGTH){
-                round_big_decimal(result, i);
-                break;
+        if (!write_before_point){
+            leading_zeros_to_exponent(result);
+        }
+        if (result->before_point_count + result->after_point_count == MAX_MANTISS_LENGTH){
+            rc = round_big_decimal(result, i);
+            if (rc){
+                return rc;
             }
+            break;
+        }
+        if (write_before_point){
             add_digit_to_end(result->mantis_before_point, result->before_point_count, i);
             result->before_point_count++;
         } else {
-            leading_zeros_to_exponent(result);
-            if (result->after_point_count + result->before_point_count == MAX_MANTISS_LENGTH){
-                round_big_decimal(result, i);
-                break;
-            }
             add_digit_to_end(result->mantis_after_point, result->after_point_count, i);
             result->after_point_count++;
         }
@@ -95,6 +99,9 @@ error divide_by_big_decimal(const big_integer *a, const big_decimal *b, big_deci
             dig_ind--;
             current_divident.dig_count++;
             result->exponent++;
+            if (result->exponent > MAX_EXPONENT_VALUE){
+                return EXPONENT_OVERFLOW;
+            }
         }
     }
     normalize(result);

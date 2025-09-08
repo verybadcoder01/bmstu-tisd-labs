@@ -2,8 +2,9 @@
 #include "constants.h"
 #include "long_division.h"
 #include "long_numbers.h"
+#include "long_numbers_io.h"
 
-// TODO: дописать тесты, сделать проверки на ввод, докинуть проверки на макс экспоненту
+// TODO: дописать тесты, сделать проверки на ввод
 
 int main(void)
 {
@@ -29,9 +30,13 @@ int main(void)
         res.before_point_count = 0;
     }
     if (res.before_point_count > 0){
-        shift_right(&res, res.before_point_count);
+        rc = shift_right(&res, res.before_point_count);
+        if (rc){
+            printf("Error %d\n", rc);
+            return rc;
+        }
     }
-    printf("Result is: ");
+    printf("Result: ");
     print_big_decimal(&res);
     return 0;
 }
