@@ -75,8 +75,14 @@ error input_big_decimal(big_decimal *result)
     int i = 1;
     for (; i < length && result->before_point_count < MAX_MANTISS_LENGTH && tmp[i] != '.' ; ++i)
     {
+        if (!isdigit(tmp[i])){
+            return WRONG_DECIMAL_INPUT;
+        }
         result->mantis_before_point[i - 1] = tmp[i] - '0';
         result->before_point_count++;
+    }
+    if (result->before_point_count == 0){
+        return WRONG_DECIMAL_INPUT;
     }
     if (i == length || result->before_point_count == MAX_MANTISS_LENGTH)
     {
@@ -88,6 +94,9 @@ error input_big_decimal(big_decimal *result)
     for (; i < length && result->after_point_count + result->before_point_count < MAX_MANTISS_LENGTH &&
            tmp[i] != 'E' && tmp[i] != 'e' ; ++i)
     {
+        if (!isdigit(tmp[i])){
+            return WRONG_DECIMAL_INPUT;
+        }
         result->mantis_after_point[i - ival] = tmp[i] - '0';
         result->after_point_count++;
     }
@@ -145,6 +154,9 @@ error input_big_integer(big_integer *result)
     int i = 1;
     for (; i < length ; ++i)
     {
+        if (!isdigit(tmp[i])){
+            return WRONG_INTEGER_INPUT;
+        }
         result->digits[result->dig_count] = tmp[i] - '0';
         result->dig_count++;
     }

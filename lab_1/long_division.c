@@ -62,7 +62,10 @@ error divide_by_big_decimal(const big_integer *a, const big_decimal *b, big_deci
         sub_from_divident.sign = 1;
         mult_big_integer_digit(&b_integer, i, &sub_from_divident);
         if (!write_before_point){
-            leading_zeros_to_exponent(result);
+            rc = leading_zeros_to_exponent(result);
+            if (rc){
+                return rc;
+            }
         }
         if (result->before_point_count + result->after_point_count == MAX_MANTISS_LENGTH){
             rc = round_big_decimal(result, i);
