@@ -5,14 +5,14 @@
 #include "stddef.h"
 
 typedef struct {
-    int digits[MAX_INTEGER_LENGTH + 1];
+    char digits[MAX_INTEGER_LENGTH + 1];
     int dig_count;
     int sign;
 } big_integer;
 
 typedef struct {
-    int mantis_before_point[MAX_MANTISS_LENGTH];
-    int mantis_after_point[MAX_MANTISS_LENGTH];
+    char mantis_before_point[MAX_MANTISS_LENGTH];
+    char mantis_after_point[MAX_MANTISS_LENGTH];
     int before_point_count, after_point_count;
     int exponent;
     int mantis_sign;
@@ -24,7 +24,7 @@ int is_zero_decimal(const big_decimal *num);
 
 int is_zero_integer(const big_integer *num);
 
-void add_digit_to_end(int *num, int size, int digit);
+void add_digit_to_end(char *num, int size, char digit);
 
 void normalize(big_decimal *num);
 
@@ -36,7 +36,7 @@ error shift_right(big_decimal *num, int places);
 
 error shift_left(big_decimal *num, int places);
 
-void reverse_array(int *arr, int size);
+void reverse_array(char *arr, int size);
 
 void subtract_big_integers(const big_integer *a, const big_integer *b, big_integer *result);
 

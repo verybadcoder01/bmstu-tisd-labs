@@ -1,5 +1,6 @@
 #include "long_numbers.h"
 #include "string.h"
+#include "stdio.h"
 
 void init_big_decimal_zero(big_decimal *num)
 {
@@ -32,9 +33,9 @@ int is_zero_integer(const big_integer *num)
     return 0;
 }
 
-void add_digit_to_end(int *num, int size, int digit)
+void add_digit_to_end(char *num, int size, char digit)
 {
-    memmove(num + 1, num, size * sizeof(int));
+    memmove(num + 1, num, size);
     num[0] = digit;
 }
 
@@ -97,7 +98,7 @@ error round_big_decimal(big_decimal *num, int new_digit)
     {
         return 0;
     }
-    for (int i = num->after_point_count - 1 ; i >= 0 ; i--)
+    for (int i = 0 ; i < num->after_point_count ; i++)
     {
         num->mantis_after_point[i] += carry;
         carry = num->mantis_after_point[i] / 10;
@@ -150,13 +151,11 @@ error shift_right(big_decimal *num, int places)
         places = available_places;
     }
 
-    memcpy(num->mantis_after_point + num->after_point_count, num->mantis_before_point + num->before_point_count - places, places * sizeof(int));
-    memset(num->mantis_before_point + num->before_point_count - places, 0, places * sizeof(int));
+    memcpy(num->mantis_after_point + num->after_point_count, num->mantis_before_point + num->before_point_count - places, places);
+    memset(num->mantis_before_point + num->before_point_count - places, 0, places);
     num->before_point_count -= places;
     num->after_point_count += places;
     num->exponent += places;
-
-    // Check for exponent overflow
     if (num->exponent > MAX_EXPONENT_VALUE)
     {
         return EXPONENT_OVERFLOW;
@@ -231,11 +230,11 @@ error shift_left(big_decimal *num, int places)
     return 0;
 }
 
-void reverse_array(int *arr, int size)
+void reverse_array(char *arr, int size)
 {
     for (int i = 0 ; i < size / 2 ; ++i)
     {
-        int tmp = arr[i];
+        char tmp = arr[i];
         arr[i] = arr[size - i - 1];
         arr[size - i - 1] = tmp;
     }
@@ -244,16 +243,16 @@ void reverse_array(int *arr, int size)
 // Non-negative, a >= b
 void subtract_big_integers(const big_integer *a, const big_integer *b, big_integer *result)
 {
-    int borrow = 0;
+    char borrow = 0;
     int i;
     result->dig_count = a->dig_count;
     result->sign = 1;
 
     for (i = 0 ; i < a->dig_count ; i++)
     {
-        int digit_a = a->digits[i];
-        int digit_b = (i < b->dig_count) ? b->digits[i] : 0;
-        int diff = digit_a - digit_b - borrow;
+        char digit_a = a->digits[i];
+        char digit_b = (i < b->dig_count) ? b->digits[i] : 0;
+        char diff = digit_a - digit_b - borrow;
 
         if (diff < 0)
         {
@@ -338,12 +337,12 @@ int compare_integer_decimal(const big_integer *a, const big_decimal *b)
     {
         return 1 * mode;
     }
-    int tmp_digs_array[MAX_MANTISS_LENGTH], tmp_a_digs_array[MAX_INTEGER_LENGTH + 1];
+    char tmp_digs_array[MAX_MANTISS_LENGTH], tmp_a_digs_array[MAX_INTEGER_LENGTH + 1];
     memcpy(tmp_a_digs_array, a->digits, sizeof(a->digits));
     reverse_array(tmp_a_digs_array, a->dig_count);
-    memcpy(tmp_digs_array, b->mantis_before_point, b->before_point_count * sizeof(int));
+    memcpy(tmp_digs_array, b->mantis_before_point, b->before_point_count);
     reverse_array(tmp_digs_array, b->before_point_count);
-    memcpy(tmp_digs_array + b->before_point_count, b->mantis_after_point, b->after_point_count * sizeof(int));
+    memcpy(tmp_digs_array + b->before_point_count, b->mantis_after_point, b->after_point_count);
     reverse_array(tmp_digs_array + b->before_point_count, b->after_point_count);
     for (int i = 0 ; i < a->dig_count ; ++i)
     {

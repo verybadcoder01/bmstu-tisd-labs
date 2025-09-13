@@ -22,6 +22,7 @@ error divide_by_big_decimal(const big_integer *a, const big_decimal *b, big_deci
     result->exponent = -b_copy.exponent;
     b_copy.exponent = 0;
     big_integer part_divide;
+    part_divide.dig_count = 0;
     int dig_ind = -10, write_before_point = 1;
     for (int i = a_copy.dig_count - 1; i >= 0; --i){
         part_divide.sign = a_copy.sign;
@@ -37,12 +38,12 @@ error divide_by_big_decimal(const big_integer *a, const big_decimal *b, big_deci
         current_divident = a_copy;
     }
     big_integer b_integer;
-    memcpy(b_integer.digits, b_copy.mantis_before_point, sizeof(b_copy.mantis_before_point));
-    memcpy(b_integer.digits + b_copy.before_point_count, b_copy.mantis_after_point, sizeof(b_copy.mantis_after_point));
+    memcpy(b_integer.digits, b_copy.mantis_before_point, b_copy.before_point_count);
+    memcpy(b_integer.digits + b_copy.before_point_count, b_copy.mantis_after_point, b_copy.after_point_count);
     b_integer.sign = 1;
     b_integer.dig_count = b_copy.before_point_count + b_copy.after_point_count;
     while (1){
-        int i = 0;
+        char i = 0;
         for (; i <= 9; ++i){
             big_integer cur_mult_res;
             cur_mult_res.dig_count = 0;
