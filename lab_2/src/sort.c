@@ -11,7 +11,7 @@ void swap(void *elem_l, void *elem_r, size_t size)
     memcpy(elem_r, buf, size);
 }
 
-void bubble_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
+error bubble_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
 {
     char *start = (char *)ptr;
     for (size_t i = 0; i < count; ++i)
@@ -31,9 +31,10 @@ void bubble_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
             break;
         }
     }
+    return 0;
 }
 
-static void merge_sorted_arrays(void *ptr_first, void *ptr_second, void *result, size_t count_first, size_t count_second, size_t elem_size, compare_func_ptr_t comp)
+void merge_sorted_arrays(void *ptr_first, void *ptr_second, void *result, size_t count_first, size_t count_second, size_t elem_size, compare_func_ptr_t comp)
 {
     size_t ind_first = 0, ind_second = 0, ind_res = 0;
     char *st_first = (char *)ptr_first;
@@ -74,7 +75,7 @@ static void merge_sorted_arrays(void *ptr_first, void *ptr_second, void *result,
     }
 }
 
-static void merge_sort_impl(void *source, void *dest, size_t start, size_t end, size_t elem_size, compare_func_ptr_t comp)
+void merge_sort_impl(void *source, void *dest, size_t start, size_t end, size_t elem_size, compare_func_ptr_t comp)
 {
     if (end - start <= 1)
     {
@@ -105,5 +106,24 @@ error merge_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
     memcpy(buf, ptr, count * size);
     merge_sort_impl(buf, ptr, 0, count, size, comp);
     free(buf);
+    return 0;
+}
+
+unsigned long elapsed_time(const struct timespec *start, const struct timespec *end)
+{
+    return (end->tv_sec * 1000000 + end->tv_nsec / 1000) -
+           (start->tv_sec * 1000000 + start->tv_nsec / 1000);
+}
+
+error measure_sort_time(unsigned long *res, sort_func_ptr_t sort, void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
+{
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &start);
+    error rc = sort(ptr, count, size, comp);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &end);
+    if (rc){
+        return rc;
+    }
+    *res = elapsed_time(&start, &end);
     return 0;
 }

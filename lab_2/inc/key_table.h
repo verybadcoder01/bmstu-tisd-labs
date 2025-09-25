@@ -14,10 +14,12 @@ typedef struct {
     size_t size;
 } key_table;
 
-int key_elem_comp(const key_table_elem *left, const key_table_elem *right);
+int key_elem_comp(const void *left, const void *right);
 
 void delete_key_table_elem(key_table_elem *elem);
 
 void delete_key_table(key_table *tab);
+
+void print_key_table_elem(key_table_elem *elem);
 
 #endif

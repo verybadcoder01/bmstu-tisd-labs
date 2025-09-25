@@ -3,12 +3,14 @@
 
 #include "stdbool.h"
 #include "errors.h"
+#include "stdio.h"
 
 typedef enum
 {
     LOCAL = 1,
     TRANSLATED = 2
 } tech_lit_origin_t;
+#define valid_tech_lit_origin(x) (x == LOCAL || x == TRANSLATED)
 
 typedef enum
 {
@@ -16,12 +18,14 @@ typedef enum
     PLAY = 2,
     POETRY = 3
 } fiction_lit_t;
+#define valid_fiction_lit(x) (x == NOVEL || x == PLAY || x == POETRY)
 
 typedef enum
 {
     POEM = 1,
     FAIRY_TALE = 2
 } kids_lit_t;
+#define valid_kids_lit(x) (x == POEM || x == FAIRY_TALE)
 
 typedef struct
 {
@@ -46,6 +50,7 @@ typedef enum {
     TECHNICAL = 2,
     KIDS = 3
 } lit_type;
+#define valid_lit_type(x) (x == FICTIONAL || x == TECHNICAL || x == KIDS)
 
 typedef union
 {
@@ -64,7 +69,7 @@ typedef struct
     int pages;
 } book;
 
-static error copy_str(char *dest, char *src);
+error copy_str(char **dest, const char *src);
 
 error deep_copy(book *dest, book* src);
 
@@ -73,5 +78,9 @@ void delete_inner_book_info(book *b);
 void delete_book(book *b);
 
 void print_book(book *b);
+
+error scan_book(FILE *f, book *b);
+
+void init_default_book(book *b);
 
 #endif
