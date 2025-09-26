@@ -5,7 +5,12 @@ test_output="$2"
 test_number=$(echo "$1" | grep -oP '[0-9]*')
 app_output_file="app_output_pos_${test_number}"
 
-if ! ./app.exe < "${test_input}" > "${app_output_file}"; then
+exec_file="./app.exe"
+if [[ ! -z "$3" ]]; then
+    exec_file="./$3"
+fi
+
+if ! "${exec_file}" < "${test_input}" > "${app_output_file}"; then
     exit 1
 fi
 

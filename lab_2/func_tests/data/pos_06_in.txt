@@ -1,0 +1,283 @@
+2
+Pushkin
+Book 9
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 8
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 7
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 6
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 5
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 4
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 39
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 38
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 37
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 36
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 35
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 34
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 33
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 32
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 31
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 30
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 3
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 29
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 28
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 27
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 26
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 25
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 24
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 23
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 22
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 21
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 20
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 2
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 19
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 18
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 17
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 16
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 15
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 14
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 13
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 12
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 11
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 10
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 1
+PubLit
+150
+1
+3
+2
+Pushkin
+Book 0
+PubLit
+150
+1
+3
+4
+1
+0

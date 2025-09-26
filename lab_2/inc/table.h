@@ -28,7 +28,7 @@ error sort_key_table(table *tab, sort_type method);
 
 error print_sorted_via_key_table(table *tab, sort_type method);
 
-void print_by_variant(table *tab, char *target);
+void print_by_variant(table *tab, const char *target);
 
 void delete_table(table *tab);
 

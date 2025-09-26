@@ -1,0 +1,5 @@
+1
+func_tests/data/pos_03_data.txt
+6
+1
+0

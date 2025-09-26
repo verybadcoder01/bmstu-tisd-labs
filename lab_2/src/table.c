@@ -3,6 +3,7 @@
 #include "errors.h"
 #include "memory.h"
 #include "time.h"
+#include "io.h"
 
 error push_back(table *tab, book *n_book)
 {
@@ -42,6 +43,10 @@ error push_back(table *tab, book *n_book)
 
 error remove_elem(table *tab, char *target_key)
 {
+    if (tab->size == 0)
+    {
+        return NO_ELEM_TO_REMOVE;
+    }
     size_t target_ind = tab->size;
     for (size_t i = 0; i < tab->size; ++i)
     {
@@ -71,8 +76,13 @@ error remove_elem(table *tab, char *target_key)
 
 error build_key_table(table *tab)
 {
+    if (tab->size == 0)
+    {
+        return 0;
+    }
     tab->keys = malloc(sizeof(key_table));
-    if (!tab->keys){
+    if (!tab->keys)
+    {
         return ALLOC_ERROR;
     }
     tab->keys->data = malloc(tab->size * sizeof(key_table_elem));
@@ -85,7 +95,8 @@ error build_key_table(table *tab)
     {
         tab->keys->data[i].key_value = NULL;
         error rc = copy_str(&tab->keys->data[i].key_value, tab->data[i].title);
-        if (rc){
+        if (rc)
+        {
             return rc;
         }
         tab->keys->data[i].source_ind = i;
@@ -95,6 +106,10 @@ error build_key_table(table *tab)
 
 error sort_key_table(table *tab, sort_type method)
 {
+    if (tab->size == 0)
+    {
+        return 0;
+    }
     if (!tab->keys)
     {
         error rc = build_key_table(tab);
@@ -126,6 +141,11 @@ error sort_key_table(table *tab, sort_type method)
 
 error print_sorted_via_key_table(table *tab, sort_type method)
 {
+    if (tab->size == 0)
+    {
+        printf("Пустая таблица.\n");
+        return 0;
+    }
     error rc = sort_key_table(tab, method);
     if (rc)
     {
@@ -142,7 +162,7 @@ error print_sorted_via_key_table(table *tab, sort_type method)
 
 int comp_book_t(const void *l, const void *r)
 {
-    return strcmp(((book*)l)->title, ((book*)r)->title);
+    return strcmp(((book *)l)->title, ((book *)r)->title);
 }
 
 error print_sorted(table *tab, sort_type method)
@@ -155,17 +175,17 @@ error print_sorted(table *tab, sort_type method)
     {
         merge_sort(tab->data, tab->size, sizeof(book), &comp_book_t);
     }
-    for (size_t i = 0; i < tab->size; ++i)
-    {
-        printf("--------------------------------------------------\n");
-        print_book(&tab->data[i]);
-        printf("--------------------------------------------------\n");
-    }
+    print_table(tab);
     return 0;
 }
 
-void print_by_variant(table *tab, char *target)
+void print_by_variant(table *tab, const char *target)
 {
+    if (tab->size == 0)
+    {
+        printf("Пустая таблица.\n");
+        return;
+    }
     for (size_t i = 0; i < tab->size; ++i)
     {
         if (!strcmp(tab->data[i].author, target) && tab->data[i].type == FICTIONAL && tab->data[i].lit_info.fic.type == NOVEL)
@@ -198,7 +218,8 @@ void delete_table(table *tab)
     tab = NULL;
 }
 
-void init_default_table(table *tab) {
+void init_default_table(table *tab)
+{
     tab->capacity = 0;
     tab->size = 0;
     tab->was_change = false;
@@ -224,12 +245,13 @@ error init_table_from_file(FILE *f, table *tab)
         }
         if (rc == EOF)
         {
+            delete_book(n_book);
             break;
         }
         rc = push_back(tab, n_book);
+        delete_book(n_book);
         if (rc)
         {
-            delete_book(n_book);
             return rc;
         }
     }
@@ -244,10 +266,17 @@ error init_table_from_file(FILE *f, table *tab)
 
 void print_key_table(table *tab)
 {
+    if (tab->size == 0)
+    {
+        printf("Пустая таблица.\n");
+        return;
+    }
     size_t max_print_sz = tab->keys->size;
-    if (tab->keys->size > 40){
+    if (tab->keys->size > 40)
+    {
         max_print_sz = 40;
     }
+    interface_printf("Формат вывода: | индекс в исходной таблице | ключ (название книги) |");
     for (size_t i = 0; i < max_print_sz; ++i)
     {
         printf("--------------------------------------------------\n");
@@ -259,8 +288,14 @@ void print_key_table(table *tab)
 
 void print_table(table *tab)
 {
+    if (tab->size == 0)
+    {
+        printf("Пустая таблица.\n");
+        return;
+    }
     size_t max_print_sz = tab->size;
-    if (tab->size > 40){
+    if (tab->size > 40)
+    {
         max_print_sz = 40;
     }
     for (size_t i = 0; i < max_print_sz; ++i)
@@ -275,42 +310,50 @@ error self_perf_test(FILE *f, unsigned long *res_bubble_orig, unsigned long *res
 {
     table *tab;
     tab = malloc(sizeof(table));
-    if (!tab){
+    if (!tab)
+    {
         return ALLOC_ERROR;
     }
     // original table, bubble sort
     error rc = init_table_from_file(f, tab);
-    if (rc){
+    if (rc)
+    {
         delete_table(tab);
         return rc;
     }
     rc = measure_sort_time(res_bubble_orig, &bubble_sort, tab->data, tab->size, sizeof(book), &comp_book_t);
     delete_table(tab);
-    if (rc){
+    if (rc)
+    {
         return rc;
     }
     // original table, merge sort
     tab = malloc(sizeof(table));
-    if (!tab){
+    if (!tab)
+    {
         return ALLOC_ERROR;
     }
     rc = init_table_from_file(f, tab);
-    if (rc){
+    if (rc)
+    {
         delete_table(tab);
         return rc;
     }
     rc = measure_sort_time(res_merge_orig, &merge_sort, tab->data, tab->size, sizeof(book), &comp_book_t);
     delete_table(tab);
-    if (rc){
+    if (rc)
+    {
         return rc;
     }
     // keys table, bubble sort
     tab = malloc(sizeof(table));
-    if (!tab){
+    if (!tab)
+    {
         return ALLOC_ERROR;
     }
     rc = init_table_from_file(f, tab);
-    if (rc){
+    if (rc)
+    {
         delete_table(tab);
         return rc;
     }
@@ -319,17 +362,20 @@ error self_perf_test(FILE *f, unsigned long *res_bubble_orig, unsigned long *res
     rc = sort_key_table(tab, BUBBLE);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
     delete_table(tab);
-    if (rc){
+    if (rc)
+    {
         return rc;
     }
     *res_bubble_keys = elapsed_time(&start, &end);
     // keys table, merge sort
     tab = malloc(sizeof(table));
-    if (!tab){
+    if (!tab)
+    {
         return ALLOC_ERROR;
     }
     rc = init_table_from_file(f, tab);
-    if (rc){
+    if (rc)
+    {
         delete_table(tab);
         return rc;
     }
@@ -337,7 +383,8 @@ error self_perf_test(FILE *f, unsigned long *res_bubble_orig, unsigned long *res
     rc = sort_key_table(tab, MERGE);
     clock_gettime(CLOCK_MONOTONIC_RAW, &end);
     delete_table(tab);
-    if (rc){
+    if (rc)
+    {
         return rc;
     }
     *res_merge_keys = elapsed_time(&start, &end);

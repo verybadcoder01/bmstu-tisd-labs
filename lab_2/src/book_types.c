@@ -89,13 +89,13 @@ error scan_book(FILE *f, book *b)
     b->publisher = NULL;
     b->title = NULL;
     b->type = 0;
-    printf("Введите автора книги\n");
+    interface_printf("Введите автора книги\n");
     error rc = scan(f, &b->author, &size);
     if (rc)
     {
         return rc;
     }
-    printf("Введите название книги\n");
+    interface_printf("Введите название книги\n");
     rc = scan(f, &b->title, &size);
     if (rc)
     {
@@ -105,7 +105,7 @@ error scan_book(FILE *f, book *b)
         }
         return rc;
     }
-    printf("Введите издателя книги\n");
+    interface_printf("Введите издателя книги\n");
     rc = scan(f, &b->publisher, &size);
     if (rc)
     {
@@ -115,13 +115,13 @@ error scan_book(FILE *f, book *b)
         }
         return rc;
     }
-    printf("Введите количество страниц в книге\n");
+    interface_printf("Введите количество страниц в книге\n");
     rc = fscanf(f, "%d", &b->pages);
     if (rc != 1)
     {
         return INPUT_ERROR;
     }
-    printf("Введите тип книги: 1 - художественная, 2 - техническая, 3 - детская\n");
+    interface_printf("Введите тип книги: 1 - художественная, 2 - техническая, 3 - детская\n");
     rc = fscanf(f, "%d", (int *)&b->type);
     if (rc != 1)
     {
@@ -133,7 +133,7 @@ error scan_book(FILE *f, book *b)
     switch (b->type)
     {
     case FICTIONAL:
-        printf("Ввелите тип художественной литературы: 1 - роман, 2 - пьеса, 3 - поэзия\n");
+        interface_printf("Ввелите тип художественной литературы: 1 - роман, 2 - пьеса, 3 - поэзия\n");
         rc = fscanf(f, "%d", (int *)&b->lit_info.fic.type);
         if (rc != 1)
         {
@@ -144,7 +144,7 @@ error scan_book(FILE *f, book *b)
         }
         break;
     case KIDS:
-        printf("Введите тип детской книги: 1 - стих, 2 - сказка и минимальный возраст\n");
+        interface_printf("Введите тип детской книги: 1 - стих, 2 - сказка и минимальный возраст\n");
         rc = fscanf(f, "%d %d", (int *)&b->lit_info.kids.type, &b->lit_info.kids.min_age);
         if (rc != 2)
         {
@@ -156,7 +156,7 @@ error scan_book(FILE *f, book *b)
         break;
     case TECHNICAL:
         b->lit_info.tech.industry = NULL;
-        printf("Введите индустрию, описанную в данной книге\n");
+        interface_printf("Введите индустрию, описанную в данной книге\n");
         rc = scan(f, &b->lit_info.tech.industry, &size);
         if (rc)
         {
@@ -166,7 +166,7 @@ error scan_book(FILE *f, book *b)
             }
             return rc;
         }
-        printf("Введите, является ли книга отечественной (1) или переведенной (2) и год ее публикации\n");
+        interface_printf("Введите, является ли книга отечественной (1) или переведенной (2) и год ее публикации\n");
         rc = fscanf(f, "%d %d", (int *)&b->lit_info.tech.origin, &b->lit_info.tech.year_published);
         if (rc != 2)
         {
@@ -177,7 +177,7 @@ error scan_book(FILE *f, book *b)
         }
         break;
     default:
-        return WRONG_LIT_TYPE;
+        return INVALID_LIT_TYPE;
     }
     return 0;
 }

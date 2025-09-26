@@ -8,7 +8,6 @@ typedef int error;
 #define EMPTY_INPUT 3
 #define FILE_NOT_ACCESSIBLE 4
 #define INPUT_ERROR 5
-#define WRONG_LIT_TYPE 6
 #define NO_TABLE 7
 #define WRONG_MENU_ITEM 8
 #define INVALID_LIT_TYPE 9

@@ -39,3 +39,33 @@ error scan(FILE *f, char **result, size_t *res_size){
     *res_size = len;
     return 0;
 }
+
+void print_err_table(){
+    interface_printf("Таблица расшифровки ошибок.\n");
+    interface_printf("1 - Ошибка выделения памяти\n");
+    interface_printf("2 - Отсутствует элемент для удаления\n");
+    interface_printf("3 - Пустой ввод\n");
+    interface_printf("4 - Файл недоступен\n");
+    interface_printf("5 - Ошибка ввода\n");
+    interface_printf("7 - Таблица не была создана\n");
+    interface_printf("8 - Неправильный выбор в меню\n");
+    interface_printf("9 - Неправильный тип литературы\n");
+    interface_printf("10 - Неправильный тип художественной литературы\n");
+    interface_printf("11 - Неправильный тип детской литературы\n");
+    interface_printf("12 - Неправильный тип технической литературы\n");
+}
+
+void interface_printf(const char *msg) {
+    (void)msg;
+    #ifdef DEBUG_PRINT
+    printf(msg);
+    #endif    
+}
+
+void interface_print_error(error rc) {
+    (void)rc;
+    #ifdef DEBUG_PRINT
+    printf("Ошибка %d\n", rc);
+    print_err_table();
+    #endif
+}

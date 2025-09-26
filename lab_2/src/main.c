@@ -12,7 +12,7 @@ typedef enum
     SORT_ORIGIN = 5,
     SORT_VIA_KEY_TABLE = 6,
     COMPARE_ORIGIN_KEYS = 7,
-    COMPARE_SORT_ALGOS = 8,
+    PRINT_BY_VARIANT = 8,
     QUIT = 0
 } menu_item;
 
@@ -24,16 +24,16 @@ int main(void)
     table *tab = NULL;
     while (1)
     {
-        printf("Выберите действие\n");
-        printf("1 - считать данные таблицы из файла\n");
-        printf("2 - добавить элемент в конец таблицы\n");
-        printf("3 - удалить книгу по названию\n");
-        printf("4 - просмотр отсортированной таблицы ключей при несортированной исходной таблице\n");
-        printf("5 - сортировка исходной таблицы\n");
-        printf("6 - вывод исходной таблицы в упорядоченном виде, используя упорядоченную таблицу ключе\n");
-        printf("7 - вывод результатов сравнения эффективности работы программы при обработке данных в исходной таблице и в таблице ключей.\nИспользуются заранее заготовленные тестовые данные\n");
-        printf("8 - вывод результатов использования различных алгоритмов сортировок.\nИспользуются заранее заготовленные тестовые данные\n");
-        printf("0 - завершить программу\n");
+        interface_printf("Выберите действие\n");
+        interface_printf("1 - считать данные таблицы из файла\n");
+        interface_printf("2 - добавить элемент в конец таблицы\n");
+        interface_printf("3 - удалить книгу по названию\n");
+        interface_printf("4 - просмотр отсортированной таблицы ключей при несортированной исходной таблице\n");
+        interface_printf("5 - сортировка исходной таблицы\n");
+        interface_printf("6 - вывод исходной таблицы в упорядоченном виде, используя упорядоченную таблицу ключе\n");
+        interface_printf("7 - вывод результатов сравнения эффективности работы программы при обработке данных в исходной таблице и в таблице ключей.\nИспользуются заранее заготовленные тестовые данные\n");
+        interface_printf("8 - вывести список всех романов указанного автора\n");
+        interface_printf("0 - завершить программу\n");
         menu_item action;
         scanf("%d", (int *)&action);
         switch (action)
@@ -45,16 +45,18 @@ int main(void)
         {
             char *file_name = NULL;
             size_t len = 0;
-            printf("Введите имя файла\n");
+            interface_printf("Введите имя файла\n");
             error rc = scan(stdin, &file_name, &len);
             if (rc)
             {
+                interface_print_error(rc);
                 return rc;
             }
             FILE *f = fopen(file_name, "r");
             if (!f)
             {
                 free(file_name);
+                interface_print_error(FILE_NOT_ACCESSIBLE);
                 return FILE_NOT_ACCESSIBLE;
             }
             tab = malloc(sizeof(table));
@@ -70,6 +72,7 @@ int main(void)
             if (rc)
             {
                 delete_table(tab);
+                interface_print_error(rc);
                 return rc;
             }
             print_table(tab);
@@ -80,7 +83,8 @@ int main(void)
             if (!tab)
             {
                 tab = malloc(sizeof(table));
-                if (!tab){
+                if (!tab)
+                {
                     return ALLOC_ERROR;
                 }
                 init_default_table(tab);
@@ -95,12 +99,15 @@ int main(void)
             {
                 delete_table(tab);
                 delete_book(n_book);
+                interface_print_error(rc);
                 return rc;
             }
             rc = push_back(tab, n_book);
+            delete_book(n_book);
             if (rc)
             {
                 delete_table(tab);
+                interface_print_error(rc);
                 return rc;
             }
         }
@@ -109,15 +116,17 @@ int main(void)
         {
             if (!tab)
             {
+                interface_print_error(NO_TABLE);
                 return NO_TABLE;
             }
             char *target_title = NULL;
             size_t size = 0;
-            printf("Введите название книги\n");
+            interface_printf("Введите название книги\n");
             error rc = scan(stdin, &target_title, &size);
             if (rc)
             {
                 delete_table(tab);
+                interface_print_error(rc);
                 return rc;
             }
             rc = remove_elem(tab, target_title);
@@ -125,6 +134,7 @@ int main(void)
             if (rc)
             {
                 delete_table(tab);
+                interface_print_error(rc);
                 return rc;
             }
         }
@@ -133,19 +143,22 @@ int main(void)
         {
             if (!tab)
             {
+                interface_print_error(NO_TABLE);
                 return NO_TABLE;
             }
             sort_type method = 0;
-            printf("Введите метод сортировки: 1 - пузырьком, 2 - слиянием\n");
+            interface_printf("Введите метод сортировки: 1 - пузырьком, 2 - слиянием\n");
             if (scanf("%d", (int *)&method) != 1 || !valid_sort_type(method))
             {
                 delete_table(tab);
+                interface_print_error(INPUT_ERROR);
                 return INPUT_ERROR;
             }
             error rc = sort_key_table(tab, method);
             if (rc)
             {
                 delete_table(tab);
+                interface_print_error(rc);
                 return rc;
             }
             print_key_table(tab);
@@ -158,10 +171,11 @@ int main(void)
                 return NO_TABLE;
             }
             sort_type method = 0;
-            printf("Введите метод сортировки: 1 - пузырьком, 2 - слиянием\n");
+            interface_printf("Введите метод сортировки: 1 - пузырьком, 2 - слиянием\n");
             if (scanf("%d", (int *)&method) != 1 || !valid_sort_type(method))
             {
                 delete_table(tab);
+                interface_print_error(INPUT_ERROR);
                 return INPUT_ERROR;
             }
             if (method == BUBBLE)
@@ -174,6 +188,7 @@ int main(void)
                 if (rc)
                 {
                     delete_table(tab);
+                    interface_print_error(rc);
                     return rc;
                 }
             }
@@ -184,19 +199,22 @@ int main(void)
         {
             if (!tab)
             {
+                interface_print_error(NO_TABLE);
                 return NO_TABLE;
             }
             sort_type method = 0;
-            printf("Введите метод сортировки: 1 - пузырьком, 2 - слиянием\n");
+            interface_printf("Введите метод сортировки: 1 - пузырьком, 2 - слиянием\n");
             if (scanf("%d", (int *)&method) != 1 || !valid_sort_type(method))
             {
                 delete_table(tab);
+                interface_print_error(INPUT_ERROR);
                 return INPUT_ERROR;
             }
             error rc = print_sorted_via_key_table(tab, method);
             if (rc)
             {
                 delete_table(tab);
+                interface_print_error(rc);
                 return rc;
             }
         }
@@ -209,6 +227,7 @@ int main(void)
                 FILE *f = fopen(perf_test_files[i], "r");
                 if (!f)
                 {
+                    interface_print_error(FILE_NOT_ACCESSIBLE);
                     return FILE_NOT_ACCESSIBLE;
                 }
                 for (int run = 0; run < PERF_TEST_RUNS; ++run)
@@ -218,6 +237,7 @@ int main(void)
                     if (rc)
                     {
                         fclose(f);
+                        interface_print_error(rc);
                         return rc;
                     }
                     avg_bubble_orig += bubble_orig;
@@ -237,8 +257,29 @@ int main(void)
             }
         }
         break;
+        case PRINT_BY_VARIANT:
+        {
+            if (!tab)
+            {
+                interface_print_error(NO_TABLE);
+                return NO_TABLE;
+            }
+            char *target_title = NULL;
+            size_t size = 0;
+            interface_printf("Введите интересующего автора\n");
+            error rc = scan(stdin, &target_title, &size);
+            if (rc)
+            {
+                delete_table(tab);
+                interface_print_error(rc);
+                return rc;
+            }
+            print_by_variant(tab, target_title);
+            free(target_title);
+        }
+        break;
         default:
-            printf("Неверный выбор.\n");
+            interface_printf("Неверный выбор.\n");
             delete_table(tab);
             return WRONG_MENU_ITEM;
         }

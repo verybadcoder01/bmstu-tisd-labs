@@ -13,16 +13,19 @@ void swap(void *elem_l, void *elem_r, size_t size)
 
 error bubble_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
 {
+    if (count == 0){
+        return 0;
+    }
     char *start = (char *)ptr;
-    for (size_t i = 0; i < count; ++i)
+    for (size_t i = 0; i < count - 1; ++i)
     {
         bool was_swap = false;
-        for (size_t j = i + 1; j < count; ++j)
+        for (size_t j = 0; j < count - i - 1; ++j)
         {
-            char *jth = (start + j * size), *prevjth = (start + (j - 1) * size);
-            if (comp(prevjth, jth) > 0)
+            char *jth = (start + j * size), *next = (start + (j + 1) * size);
+            if (comp(next, jth) < 0)
             {
-                swap(jth, prevjth, size);
+                swap(jth, next, size);
                 was_swap = true;
             }
         }

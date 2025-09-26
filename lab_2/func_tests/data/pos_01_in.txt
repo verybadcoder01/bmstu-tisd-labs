@@ -1,0 +1,32 @@
+2
+Pushkin
+Book 2
+RusLit
+200
+1
+1
+2
+Kolotushkin
+Book 4
+RosMan
+300
+3
+2 15
+2
+Kraykushkin
+Book 1
+PubLit
+1234
+2
+Coal mining
+2 1984
+2
+Ryabushkin
+Book 3
+CringeLit
+9391
+1
+2
+5
+2
+0

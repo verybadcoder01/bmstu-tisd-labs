@@ -15,7 +15,13 @@ for input_file in "$TESTS_DIR"/pos_*_in.txt; do
     number=$(echo "$input_file" | grep -oP '[0-9]*')
     output_file="$TESTS_DIR/pos_${number}_out.txt"
     if [ -f "$output_file" ]; then
-        ./func_tests/scripts/pos_case.sh "${input_file}" "${output_file}"
+
+        if [[ "$1" == "-v" ]]; then
+            ./func_tests/scripts/pos_case.sh "${input_file}" "${output_file}" "$2"
+        else 
+            ./func_tests/scripts/pos_case.sh "${input_file}" "${output_file}" "$2" > /dev/null 2>&1
+        fi
+
         test_result=$?
         if [[ "$1" == "-v" && "$test_result" -ne 0 ]]; then
             echo "Pos test ${number} not passed: expected output $(cat "${output_file}"), got file app_output_pos_${number}"
@@ -28,7 +34,13 @@ for input_file in "$TESTS_DIR"/pos_*_in.txt; do
 done
 
 for input_file in "$TESTS_DIR"/neg_*_in.txt; do
-    ./func_tests/scripts/neg_case.sh "${input_file}"
+
+    if [[ "$1" == "-v" ]]; then
+        ./func_tests/scripts/neg_case.sh "${input_file}" "$2"
+    else
+        ./func_tests/scripts/neg_case.sh "${input_file}" "$2" > /dev/null 2>&1
+    fi
+
     test_result=$?
     if [[ "$1" == "-v" && "$test_result" -ne 0 ]]; then
         number=$(echo "$input_file" | grep -oP '[0-9]*')

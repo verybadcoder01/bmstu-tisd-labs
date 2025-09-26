@@ -20,6 +20,10 @@ UNIT_EXE := unit_tests.exe
 FUNC_EXE := app.exe
 SAN_FUNC_EXE := san_app.exe
 
+ifneq (,$(findstring i, $(MAKEFLAGS)))
+	CFLAGS += -DDEBUG_PRINT
+endif
+
 .PHONY: all unit func clean test_san
 
 all: $(FUNC_EXE)
@@ -49,11 +53,11 @@ func: $(FUNC_EXE)
 	./$(FUNC_TESTS_SCRIPT)
 
 test_san: $(SAN_FUNC_EXE)
-	-./$(FUNC_TESTS_SCRIPT) -v san_app.exe
+	-./$(FUNC_TESTS_SCRIPT) -nv san_app.exe
 	$(eval SANITIZER_FLAGS := $(SANITIZER_FLAGS_MEMORY))
 	make clean
 	make san_app.exe
-	-./$(FUNC_TESTS_SCRIPT) -v san_app.exe
+	-./$(FUNC_TESTS_SCRIPT) -nv san_app.exe
 
 clean:
 	rm -f $(UNIT_EXE) $(FUNC_EXE) $(SAN_FUNC_EXE)
