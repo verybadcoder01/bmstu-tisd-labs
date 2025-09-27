@@ -271,12 +271,15 @@ void print_key_table(table *tab)
         printf("Пустая таблица.\n");
         return;
     }
+    if (!tab->keys){
+        build_key_table(tab);
+    }
     size_t max_print_sz = tab->keys->size;
     if (tab->keys->size > 40)
     {
         max_print_sz = 40;
     }
-    interface_printf("Формат вывода: | индекс в исходной таблице | ключ (название книги) |");
+    interface_printf("Формат вывода: | индекс в исходной таблице | ключ (название книги) |\n");
     for (size_t i = 0; i < max_print_sz; ++i)
     {
         printf("--------------------------------------------------\n");

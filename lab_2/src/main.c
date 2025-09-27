@@ -13,6 +13,8 @@ typedef enum
     SORT_VIA_KEY_TABLE = 6,
     COMPARE_ORIGIN_KEYS = 7,
     PRINT_BY_VARIANT = 8,
+    PRINT_TABLE = 9,
+    PRINT_KEY_TABLE = 10,
     QUIT = 0
 } menu_item;
 
@@ -33,6 +35,8 @@ int main(void)
         interface_printf("6 - вывод исходной таблицы в упорядоченном виде, используя упорядоченную таблицу ключе\n");
         interface_printf("7 - вывод результатов сравнения эффективности работы программы при обработке данных в исходной таблице и в таблице ключей.\nИспользуются заранее заготовленные тестовые данные\n");
         interface_printf("8 - вывести список всех романов указанного автора\n");
+        interface_printf("9 - вывести таблицу\n");
+        interface_printf("10 - вывести таблицу ключей\n");
         interface_printf("0 - завершить программу\n");
         menu_item action;
         scanf("%d", (int *)&action);
@@ -278,6 +282,22 @@ int main(void)
             free(target_title);
         }
         break;
+        case PRINT_TABLE:
+            if (!tab)
+            {
+                interface_print_error(NO_TABLE);
+                return NO_TABLE;
+            }
+            print_table(tab);
+            break;
+        case PRINT_KEY_TABLE:
+            if (!tab)
+            {
+                interface_print_error(NO_TABLE);
+                return NO_TABLE;
+            }
+            print_key_table(tab);
+            break;
         default:
             interface_printf("Неверный выбор.\n");
             delete_table(tab);
