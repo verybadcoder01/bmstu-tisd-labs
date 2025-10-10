@@ -8,7 +8,10 @@ typedef enum {
     WRONG_VEC_COORD = 4,
     EMPTY_MAT = 5,
     WRONG_MAT_ROW = 6,
-    WRONG_MAT_COL = 7
+    WRONG_MAT_COL = 7,
+    INCOMPATIBLE_SIZES = 8,
+    WRONG_MAT_ELEM_CNT = 9,
+    WRONG_VEC_ELEM_CNT = 10
 } error;
 
 #endif

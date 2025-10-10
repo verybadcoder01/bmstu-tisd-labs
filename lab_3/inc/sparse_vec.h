@@ -15,6 +15,7 @@ typedef struct
     vec_elem_t *vec;
     size_t elem_cnt;
     size_t elem_cap;
+    size_t true_len;
 } sparse_vector;
 
 int comp_vec_elems(const void *l, const void *r);
@@ -23,8 +24,10 @@ error add_vec_elem(sparse_vector *sv, vec_elem_t *val);
 
 error init_sp_vector_from_file(sparse_vector *sv, FILE *f);
 
-error empty_sp_vector(sparse_vector *sv);
+error empty_sp_vector(sparse_vector **sv);
 
 void delete_sp_vec(sparse_vector *sv);
+
+void print_sp_vec(sparse_vector *sv);
 
 #endif

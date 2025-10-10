@@ -2,6 +2,7 @@
 #include "memory.h"
 #include "sort.h"
 #include "stdlib.h"
+#include "utils.h"
 
 void delete_sp_matrix(sparse_matrix *sm)
 {
@@ -15,20 +16,22 @@ void delete_sp_matrix(sparse_matrix *sm)
     sm = NULL;
 }
 
-error empty_sp_matrix(sparse_matrix *sm)
+error empty_sp_matrix(sparse_matrix **sm)
 {
-    delete_sp_matrix(sm);
-    sm = malloc(sizeof(sparse_matrix));
-    if (!sm)
+    delete_sp_matrix(*sm);
+    *sm = malloc(sizeof(sparse_matrix));
+    if (!*sm)
     {
         return ALLOC_ERROR;
     }
-    sm->mat_straight = NULL;
-    sm->row_start_inds = NULL;
-    sm->rows_cnt = 0;
-    sm->rows_cap = 0;
-    sm->mat_elems_cnt = 0;
-    sm->mat_elems_cap = 0;
+    (*sm)->mat_straight = NULL;
+    (*sm)->row_start_inds = NULL;
+    (*sm)->rows_cnt = 0;
+    (*sm)->rows_cap = 0;
+    (*sm)->mat_elems_cnt = 0;
+    (*sm)->mat_elems_cap = 0;
+    (*sm)->true_cols = 0;
+    (*sm)->true_rows = 0;
     return 0;
 }
 
@@ -120,35 +123,59 @@ error add_matr_elem(sparse_matrix *sm, double val, size_t row_ind, size_t col_in
     return push_elem_to_row(sm, row_ind, row_desc_start, row_desc_end, &temp_elem);
 }
 
+error read_size(sparse_matrix *sm, FILE *f)
+{
+    interface_printf("Введите настоящее число строк и столбцов матрицы\n");
+    int rc = fscanf(f, "%zu %zu", &sm->true_rows, &sm->true_cols);
+    if (rc == EOF)
+    {
+        return rc;
+    }
+    if (rc != 2)
+    {
+        return INPUT_ERROR;
+    }
+    if (sm->true_rows == 0 || sm->true_cols == 0)
+    {
+        return EMPTY_MAT;
+    }
+    return 0;
+}
+
 error init_sp_matrix_from_file(sparse_matrix *sm, FILE *f)
 {
-    int rc = empty_sp_matrix(sm);
+    int rc = read_size(sm, f);
     if (rc)
     {
         return rc;
     }
-    while (1)
+    interface_printf("Введите число ненулевых элементов матрицы\n");
+    int matr_elems = 0;
+    if (fscanf(f, "%d", &matr_elems) != 1){
+        return INPUT_ERROR;
+    }
+    if (matr_elems < 0 || (size_t)matr_elems > sm->true_cols * sm->true_rows){
+        return WRONG_MAT_ELEM_CNT;
+    }
+    if (matr_elems == 0){
+        return EMPTY_MAT;
+    }
+    interface_printf("Введите элементы матрицы\n");
+    interface_printf("Формат ввода: значение, номер строки, номер столбца (в 0-индексации)\n");
+    for (int _ = 0; _ < matr_elems; ++_)
     {
         double val = 0;
         int row = 0, col = 0;
         int rc = fscanf(f, "%lf %d %d", &val, &row, &col);
-        if (rc == EOF)
-        {
-            if (sm->mat_elems_cnt == 0)
-            {
-                return EMPTY_MAT;
-            }
-            break;
-        }
         if (rc != 3)
         {
             return INPUT_ERROR;
         }
-        if (row < 0)
+        if (row < 0 || row >= (int)sm->true_rows)
         {
             return WRONG_MAT_ROW;
         }
-        if (col < 0)
+        if (col < 0 || col >= (int)sm->true_cols)
         {
             return WRONG_MAT_COL;
         }
@@ -158,14 +185,5 @@ error init_sp_matrix_from_file(sparse_matrix *sm, FILE *f)
             return rc;
         }
     }
-    for (size_t i = 0; i < sm->rows_cnt - 1; ++i)
-    {
-        rc = merge_sort(sm->mat_straight + sm->row_start_inds[i], sm->row_start_inds[i + 1] - sm->row_start_inds[i], sizeof(matrix_elem_t), comp_matr_elems);
-        if (rc)
-        {
-            return rc;
-        }
-    }
-    size_t last_row_beg = sm->row_start_inds[sm->rows_cnt - 1];
-    return merge_sort(sm->mat_straight + last_row_beg, sm->mat_elems_cnt - last_row_beg, sizeof(matrix_elem_t), comp_matr_elems);
+    return 0;
 }

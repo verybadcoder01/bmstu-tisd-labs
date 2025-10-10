@@ -1,6 +1,7 @@
 #include "sparse_vec.h"
 #include "stdlib.h"
 #include "sort.h"
+#include "utils.h"
 
 error add_vec_elem(sparse_vector *sv, vec_elem_t *val)
 {
@@ -33,17 +34,18 @@ error add_vec_elem(sparse_vector *sv, vec_elem_t *val)
     return 0;
 }
 
-error empty_sp_vector(sparse_vector *sv)
+error empty_sp_vector(sparse_vector **sv)
 {
-    delete_sp_vec(sv);
-    sv = malloc(sizeof(sparse_vector));
-    if (!sv)
+    delete_sp_vec(*sv);
+    *sv = malloc(sizeof(sparse_vector));
+    if (!*sv)
     {
         return ALLOC_ERROR;
     }
-    sv->elem_cap = 0;
-    sv->elem_cnt = 0;
-    sv->vec = NULL;
+    (*sv)->elem_cap = 0;
+    (*sv)->elem_cnt = 0;
+    (*sv)->vec = NULL;
+    (*sv)->true_len = 0;
     return 0;
 }
 
@@ -65,29 +67,41 @@ int comp_vec_elems(const void *l, const void *r)
 
 error init_sp_vector_from_file(sparse_vector *sv, FILE *f)
 {
-    int rc = empty_sp_vector(sv);
-    if (rc)
-    {
-        return rc;
+    interface_printf("Введите вектор\n");
+    interface_printf("Введите настоящую длину вектора\n");
+    int rc = fscanf(f, "%zu", &sv->true_len);
+    if (rc == EOF){
+        return EMPTY_VEC;
     }
+    if (rc != 1){
+        return INPUT_ERROR;
+    }
+    if (sv->true_len == 0){
+        return EMPTY_VEC;
+    }
+    int vec_elem_cnt = 0;
+    interface_printf("Введите число ненулевых элементов вектора\n");
+    if (fscanf(f, "%d", &vec_elem_cnt) != 1){
+        return INPUT_ERROR;
+    }
+    if (vec_elem_cnt <= 0 || (size_t)vec_elem_cnt > sv->true_len){
+        return WRONG_VEC_ELEM_CNT;
+    }
+    if (vec_elem_cnt == 0){
+        return EMPTY_VEC;
+    }
+    interface_printf("Введите элементы вектора\n");
+    interface_printf("Формат ввода: каждый элемент вектора описывается числом с плавающей точкой (значение) и его индексом (в 0-нумерации)\n");
     double temp_val = 0;
     int temp_coord = 0;
-    while (1)
+    for (int _ = 0; _ < vec_elem_cnt; ++_)
     {
         rc = fscanf(f, "%lf %d", &temp_val, &temp_coord);
-        if (rc == EOF)
-        {
-            if (sv->elem_cnt == 0)
-            {
-                return EMPTY_VEC;
-            }
-            break;
-        }
         if (rc != 2)
         {
             return INPUT_ERROR;
         }
-        if (temp_coord < 0)
+        if (temp_coord < 0 || temp_coord >= (int)sv->true_len)
         {
             return WRONG_VEC_COORD;
         }
@@ -99,4 +113,11 @@ error init_sp_vector_from_file(sparse_vector *sv, FILE *f)
         }
     }
     return merge_sort(sv->vec, sv->elem_cnt, sizeof(vec_elem_t), comp_vec_elems);
+}
+
+void print_sp_vec(sparse_vector *sv) {
+    interface_printf("Вывод в формате\n| индекс | значение |\n");
+    for (size_t i = 0; i < sv->elem_cnt; ++i){
+        printf("| %zu | %.6lf |\n", sv->vec[i].ind, sv->vec[i].data);
+    }
 }
