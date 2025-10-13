@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Werror -Wpedantic -Wextra -Wfloat-equal -Wfloat-conversion -Iinc -std=gnu99 -g -O0
+CFLAGS := -Wall -Werror -Wpedantic -Wextra -Wfloat-equal -Wfloat-conversion -Iinc -std=gnu99 -g -O3
 SAN_COMP := clang
 SANITIZER_FLAGS_ADDRESS := -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer -g
 SANITIZER_FLAGS_MEMORY := -fsanitize=memory -fPIE -pie -fno-omit-frame-pointer -g

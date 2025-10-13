@@ -13,19 +13,20 @@ typedef struct
 typedef struct
 {
     matrix_elem_t *mat_straight;
-    size_t mat_elems_cnt, mat_elems_cap;
+    size_t mat_elems_cnt;
     size_t *row_start_inds;
-    size_t rows_cnt, rows_cap;
+    size_t rows_cnt;
     size_t true_rows, true_cols;
 } sparse_matrix;
 
+typedef struct {
+    double value;
+    size_t row, col;
+} coord_elem_t;
+
 int comp_matr_elems(const void *l, const void *r);
 
-error push_elem_to_row(sparse_matrix *sm, size_t row_ind, size_t row_desc_beg, size_t row_desc_end, matrix_elem_t *elem);
-
-error add_rows(sparse_matrix *sm, size_t ind_up_to);
-
-error add_matr_elem(sparse_matrix *sm, double val, size_t row_ind, size_t col_ind);
+int comp_coord_elems(const void *l, const void *r);
 
 error empty_sp_matrix(sparse_matrix **sm);
 

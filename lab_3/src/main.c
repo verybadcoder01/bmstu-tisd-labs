@@ -2,9 +2,20 @@
 #include "sparse_vec.h"
 #include "perf_test.h"
 #include "utils.h"
+#include "string.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
+    if (argc == 2 && !strcmp(argv[1], "p")){
+        printf("starting perf test\n");
+        error rc = run_perf_test();
+        if (rc){
+            interface_printf_err(rc);
+            return rc;
+        }
+        return 0;
+    }
+    printf("not starting perf test\n");
     sparse_matrix *sm = NULL;
     error rc = empty_sp_matrix(&sm);
     if (rc){
@@ -44,7 +55,7 @@ int main(void)
         interface_printf_err(rc);
         return rc;
     }
-    rc = mult_mat_vec(sm, sv, res);
+    rc = mult_sp_mat_sp_vec(sm, sv, res);
     delete_sp_matrix(sm);
     delete_sp_vec(sv);
     if (rc)
