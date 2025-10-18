@@ -75,6 +75,11 @@ error build_sparse_matr(sparse_matrix *sm, coord_elem_t *elems)
     {
         return rc;
     }
+    rc = check_duplicates(elems, sm->mat_elems_cnt, sizeof(coord_elem_t), comp_coord_elems);
+    if (rc)
+    {
+        return rc;
+    }
     sm->mat_straight = malloc(sm->mat_elems_cnt * sizeof(matrix_elem_t));
     if (!sm->mat_straight)
     {
@@ -85,14 +90,17 @@ error build_sparse_matr(sparse_matrix *sm, coord_elem_t *elems)
     {
         return ALLOC_ERROR;
     }
-    for (size_t i = 0; i <= sm->true_rows; ++i) {
+    for (size_t i = 0; i <= sm->true_rows; ++i)
+    {
         sm->row_start_inds[i] = 0;
     }
     size_t current_index = 0;
-    for (size_t row = 0; row < sm->true_rows; ++row) {
+    for (size_t row = 0; row < sm->true_rows; ++row)
+    {
         sm->row_start_inds[row] = current_index;
-        
-        while (current_index < sm->mat_elems_cnt && elems[current_index].row == row) {
+
+        while (current_index < sm->mat_elems_cnt && elems[current_index].row == row)
+        {
             sm->mat_straight[current_index].data = elems[current_index].value;
             sm->mat_straight[current_index].col_ind = elems[current_index].col;
             current_index++;

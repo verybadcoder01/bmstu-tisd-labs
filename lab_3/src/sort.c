@@ -85,3 +85,15 @@ error merge_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp)
     free(buf);
     return 0;
 }
+
+error check_duplicates(void *ptr, size_t count, size_t size, compare_func_ptr_t comp) {
+    char *buf = (char*)ptr;
+    for (size_t i = 0; i < count - 1; ++i){
+        char *cur = buf + i * size;
+        char *next = buf + (i + 1) * size;
+        if (comp(cur, next) == 0){
+            return DUPLICATE_COORD;
+        }
+    }
+    return 0;
+}

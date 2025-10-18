@@ -7,7 +7,7 @@
 int main(int argc, char **argv)
 {
     if (argc == 2 && !strcmp(argv[1], "p")){
-        printf("starting perf test\n");
+        printf("Запускаю сравнение производительности\n");
         error rc = run_perf_test();
         if (rc){
             interface_printf_err(rc);
@@ -15,7 +15,7 @@ int main(int argc, char **argv)
         }
         return 0;
     }
-    printf("not starting perf test\n");
+    printf("Не запускаю сравнение производительности\n");
     sparse_matrix *sm = NULL;
     error rc = empty_sp_matrix(&sm);
     if (rc){
@@ -38,7 +38,7 @@ int main(int argc, char **argv)
         interface_printf_err(rc);
         return rc;
     }
-    rc = init_sp_vector_from_file(sv, stdin);
+    rc = init_sp_vector_from_file(sv, stdin, sm->true_cols);
     if (rc)
     {
         delete_sp_matrix(sm);

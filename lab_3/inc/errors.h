@@ -12,7 +12,8 @@ typedef enum {
     INCOMPATIBLE_SIZES = 8,
     WRONG_MAT_ELEM_CNT = 9,
     WRONG_VEC_ELEM_CNT = 10,
-    PERF_TEST_ERROR = 11
+    PERF_TEST_ERROR = 11,
+    DUPLICATE_COORD = 12
 } error;
 
 #endif

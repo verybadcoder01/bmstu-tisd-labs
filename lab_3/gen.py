@@ -1,7 +1,9 @@
 from random import randint as rnd
 
+DIR = "perf"
+
 def gen_perc_reg(percent, rows, cols):
-    filename = f"{percent}_perc_reg.txt"
+    filename = f"{DIR}/{percent}_perc_{rows}_reg.txt"
     with open(filename, 'w') as f:
         f.write(f"{rows} {cols}\n")
         for i in range(rows):
@@ -22,7 +24,7 @@ def gen_perc_reg(percent, rows, cols):
 
 
 def gen_perc_sparse(percent, rows, cols):
-    filename = f"{percent}_perc.txt"
+    filename = f"{DIR}/{percent}_perc_{rows}.txt"
     elems = []
     with open(filename, 'w') as f:
         for i in range(rows):
@@ -47,10 +49,12 @@ def gen_perc_sparse(percent, rows, cols):
             
 def main():
     percs = [1, 10, 30, 50, 70, 80, 100]
+    sizes = [500, 1000, 2000, 5000]
     for perc in percs:
-        gen_perc_reg(perc, 5000, 5000)
-        gen_perc_sparse(perc, 5000, 5000)
-        print(f"generated for {perc}")
+        for size in sizes:
+            gen_perc_reg(perc, size, size)
+            gen_perc_sparse(perc, size, size)
+            print(f"generated for {perc} and {size}")
     
     
 if __name__ == '__main__':

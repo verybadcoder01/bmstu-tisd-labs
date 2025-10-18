@@ -20,11 +20,14 @@ void print_err_table(){
     interface_printf("8 - несовместимые размеры для умножения\n");
     interface_printf("9 - недопустимое количество элементов в матрице\n");
     interface_printf("10 - недопустимое количество элементов в векторе\n");
+    interface_printf("11 - ошибка запуска сравнения производительности\n");
+    interface_printf("12 - ввод содержит повторяющиеся координаты\n");
 }
 
 void interface_printf_err(error rc) {
     (void)rc;
     #ifdef DEBUG_PRINT
     printf("Ошибка %d\n", rc);
+    print_err_table();
     #endif
 }

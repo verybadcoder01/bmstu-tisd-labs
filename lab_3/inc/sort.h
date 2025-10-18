@@ -14,4 +14,6 @@ void merge_sort_impl(void *source, void *dest, size_t start, size_t end, size_t 
 
 error merge_sort(void *ptr, size_t count, size_t size, compare_func_ptr_t comp);
 
+error check_duplicates(void *ptr, size_t count, size_t size, compare_func_ptr_t comp);
+
 #endif
