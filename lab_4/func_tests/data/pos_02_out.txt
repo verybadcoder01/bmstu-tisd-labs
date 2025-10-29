@@ -1,0 +1,12 @@
+cde
+bcd
+abc
+cba
+dcb
+edc
+abc
+cba
+fge
+abc
+cba
+egf
