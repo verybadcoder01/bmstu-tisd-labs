@@ -13,4 +13,6 @@ void interface_printf_menu();
 
 void clear_stdin();
 
+void print_err_table();
+
 #endif

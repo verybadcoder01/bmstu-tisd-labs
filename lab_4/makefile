@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Werror -Wpedantic -Wextra -Wfloat-equal -Wfloat-conversion -Iinc -std=gnu99 -g -O1
+CFLAGS := -Wall -Werror -Wpedantic -Wextra -Wfloat-equal -Wfloat-conversion -Iinc -std=gnu99 -g -O0
 SAN_COMP := clang
 SANITIZER_FLAGS_ADDRESS := -fsanitize=undefined -fsanitize=address -fno-omit-frame-pointer -g
 SANITIZER_FLAGS_MEMORY := -fsanitize=memory -fPIE -pie -fno-omit-frame-pointer -g
@@ -22,6 +22,10 @@ SAN_FUNC_EXE := san_app.exe
 
 ifneq (,$(findstring i, $(MAKEFLAGS)))
 	CFLAGS += -DDEBUG_PRINT
+endif
+
+ifneq (,$(findstring w, $(MAKEFLAGS)))
+	CFLAGS += -DPERF_TEST
 endif
 
 .PHONY: all unit func clean test_san

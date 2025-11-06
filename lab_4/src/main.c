@@ -23,9 +23,11 @@ typedef enum
 
 int main(int argc, char **argv)
 {
-    if (argc == 2 && !strcmp(argv[1], "p")){
+    if (argc == 2 && !strcmp(argv[1], "p"))
+    {
         error rc = run_perf_test();
-        if (rc){
+        if (rc)
+        {
             interface_printf_err(rc);
             return rc;
         }
@@ -90,32 +92,46 @@ int main(int argc, char **argv)
                 rc = stack_list_push(&st_list, data);
             }
             free(data);
-            if (rc)
+            if (rc && rc != STACK_OVERFLOW)
             {
                 delete_stack_list(&st_list);
                 delete_stack_arr(&st_arr);
                 interface_printf_err(rc);
                 return rc;
+            }
+            else if (rc == STACK_OVERFLOW)
+            {
+                interface_printf_err(rc);
             }
             break;
         }
         case POP:
         {
             error rc = 0;
+            char *data = NULL;
             if (type == ARRAY)
             {
-                rc = pop_stack_arr(&st_arr);
+                rc = pop_stack_arr(&st_arr, &data);
             }
             else
             {
-                rc = stack_list_pop(&st_list);
+                rc = stack_list_pop(&st_list, &data);
             }
-            if (rc)
+            if (rc && rc != EMPTY_STACK)
             {
                 delete_stack_list(&st_list);
                 delete_stack_arr(&st_arr);
                 interface_printf_err(rc);
                 return rc;
+            }
+            else if (rc == EMPTY_STACK)
+            {
+                interface_printf_err(rc);
+            }
+            if (!rc)
+            {
+                printf("%s\n", data);
+                free(data);
             }
             break;
         }

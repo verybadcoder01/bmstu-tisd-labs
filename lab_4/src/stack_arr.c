@@ -20,12 +20,13 @@ error push_stack_arr(stack_arr *st, char *n_elem)
     return STACK_OVERFLOW;
 }
 
-error pop_stack_arr(stack_arr *st)
+error pop_stack_arr(stack_arr *st, char **res)
 {
     if (st->size == 0)
     {
         return EMPTY_STACK;
     }
+    *res = st->data[st->size - 1];
     free(st->data[st->size - 1]);
     st->size--;
     return 0;
@@ -40,15 +41,15 @@ void print_st_arr(stack_arr *st){
 }
 
 void print_rev_st_arr(stack_arr *st){
-    interface_printf("--- Дно стека ---\n");
-    for (int i = 0; i < (int)st->size; ++i){
+    interface_printf("--- Вершина стека ---\n");
+    for (int i = st->size - 1; i >= 0; --i){
         size_t len = strlen(st->data[i]);
         for (int j = len - 1; j >= 0; --j){
             printf("%c", st->data[i][j]);
         }
         printf("\n");
     }
-    interface_printf("--- Вершина стека ---\n");
+    interface_printf("--- Дно стека ---\n");
 }
 
 void delete_stack_arr(stack_arr *st){

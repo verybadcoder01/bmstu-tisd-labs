@@ -52,7 +52,8 @@ error measure_walk_stack_arr(stack_arr *st, int elems, unsigned long *res)
     *res = time_walk_stack_arr;
     for (int j = 0; j < elems; ++j)
     {
-        error rc = pop_stack_arr(st);
+        char *data;
+        error rc = pop_stack_arr(st, &data);
         if (rc)
         {
             return rc;
@@ -82,7 +83,8 @@ error measure_walk_stack_list(stack_list *st, int elems, unsigned long *res)
     *res = time_walk_stack_list;
     for (int j = 0; j < elems; ++j)
     {
-        error rc = stack_list_pop(st);
+        char *tmp;
+        error rc = stack_list_pop(st, &tmp);
         if (rc)
         {
             return rc;
@@ -114,7 +116,8 @@ error run_perf_test()
         {
             return rc;
         }
-        rc = pop_stack_arr(&st_arr);
+        char *data;
+        rc = pop_stack_arr(&st_arr, &data);
         if (rc)
         {
             return rc;
@@ -125,12 +128,13 @@ error run_perf_test()
     clock_gettime(CLOCK_MONOTONIC_RAW, &start);
     for (int i = 0; i < PERF_TEST_RUNS_PUSH_POP; ++i)
     {
+        char *tmp;
         error rc = stack_list_push(&st_list, "abcd");
         if (rc)
         {
             return rc;
         }
-        rc = stack_list_pop(&st_list);
+        rc = stack_list_pop(&st_list, &tmp);
         if (rc)
         {
             return rc;
@@ -145,14 +149,18 @@ error run_perf_test()
     {
         min_size = MAX_STACK_LIST_SIZE;
     }
-    unsigned long time_walk_stack_arr = 0;
-    error rc = measure_walk_stack_arr(&st_arr, min_size, &time_walk_stack_arr);
-    if (rc){
-        return rc;
+    for (size_t i = 1000; i <= (size_t)min_size; i += 1000)
+    {
+        unsigned long time_walk_stack_arr = 0;
+        error rc = measure_walk_stack_arr(&st_arr, i, &time_walk_stack_arr);
+        if (rc)
+        {
+            return rc;
+        }
+        printf("Среднее время обхода стека на массиве из %zu элементов: %.6lf\n", i, (double)time_walk_stack_arr / (double)PERF_TEST_RUNS_PROCESS);
+        unsigned long time_walk_stack_list = 0;
+        rc = measure_walk_stack_list(&st_list, i, &time_walk_stack_list);
+        printf("Среднее время обхода стека на списке %zu элементов: %.6lf\n", i, (double)time_walk_stack_list / (double)PERF_TEST_RUNS_PROCESS);
     }
-    printf("Среднее время обхода стека на массиве: %.6lf\n", (double)time_walk_stack_arr / (double)PERF_TEST_RUNS_PROCESS);
-    unsigned long time_walk_stack_list = 0;
-    rc = measure_walk_stack_list(&st_list, min_size, &time_walk_stack_list);
-    printf("Среднее время обхода стека на списке: %.6lf\n", (double)time_walk_stack_list / (double)PERF_TEST_RUNS_PROCESS);
     return 0;
 }

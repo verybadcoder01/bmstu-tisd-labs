@@ -30,7 +30,7 @@ error stack_list_push(stack_list *st, char *n_elem);
 
 error add_freed_ptr(stack_list *st, const node *ptr);
 
-error stack_list_pop(stack_list *st);
+error stack_list_pop(stack_list *st, char **res);
 
 void stack_list_print(stack_list *st);
 

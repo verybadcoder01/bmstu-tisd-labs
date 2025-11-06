@@ -82,7 +82,7 @@ error add_freed_ptr(stack_list *st, const node *ptr)
     return 0;
 }
 
-error stack_list_pop(stack_list *st)
+error stack_list_pop(stack_list *st, char **res)
 {
     if (st->size == 0)
     {
@@ -98,8 +98,9 @@ error stack_list_pop(stack_list *st)
     interface_printf("Очищенный адрес:\n");
     interface_printf_ptr(temp);
     #endif
+    *res = temp->data;
     st->head = st->head->next;
-    delete_node(&temp);
+    free(temp);
     st->size--;
     return 0;
 }
