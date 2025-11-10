@@ -60,3 +60,4 @@ dkms.conf
 *.zip
 *.pdf
 lab_3/perf
+*/compile_flags.txt

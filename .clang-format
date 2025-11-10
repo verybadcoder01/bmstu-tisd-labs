@@ -1,0 +1,14 @@
+BasedOnStyle: Microsoft
+IndentWidth: 4
+ColumnLimit: 0
+AllowShortFunctionsOnASingleLine: None
+
+# { "ab", "cd", "ef" } вместо {"ab", "cd", "ef"}
+Cpp11BracedListStyle: false
+
+# Уменьшаем количество пустых строк
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+
+# Оставляем 1 пустую строку после объявления лексем
+SeparateDefinitionBlocks: Always
