@@ -4,8 +4,11 @@
 #include "stdio.h"
 #include "stdlib.h"
 
-queue_list empty_queue(freed_history *fr) {
-    queue_list q = {NULL, NULL, 0, fr};
+int printed_count = 0;
+
+queue_list empty_queue(freed_history *fr)
+{
+    queue_list q = { NULL, NULL, 0, fr };
     return q;
 }
 
@@ -33,9 +36,10 @@ error queue_list_push(queue_list *ql, request *req, mode print_ptr)
     {
         return rc;
     }
-    if (print_ptr == USER)
+    if (print_ptr == USER && printed_count < 50)
     {
-        printf("Выделенный адрес: %p\n", (void*)n_node);
+        printed_count++;
+        printf("Выделенный адрес: %p\n", (void *)n_node);
     }
     if (ql->size == 0)
     {
@@ -65,7 +69,7 @@ error add_node_hist(queue_list *ql, node *n_old)
         {
             n_cap = 2 * ql->fr->cap;
         }
-        void **tmp_buf = realloc(ql->fr->ptrs, n_cap * sizeof(void*));
+        void **tmp_buf = realloc(ql->fr->ptrs, n_cap * sizeof(void *));
         if (!tmp_buf)
         {
             return ALLOC_ERROR;
@@ -84,8 +88,10 @@ error queue_list_pop(queue_list *ql, request *deleted, mode add_history)
     {
         return EMPTY_QUEUE_DEL;
     }
-    if (add_history == USER)
+    if (add_history == USER && printed_count < 50)
     {
+        printf("Освобожденный адрес %p\n", (void *)ql->head);
+        printed_count++;
         error rc = add_node_hist(ql, ql->head);
         if (rc)
         {

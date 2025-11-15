@@ -203,28 +203,35 @@ void print_core_data(simulation *sim)
     printf("Среднее время в очереди для 2-го типа: %.6f\n", avg_queue_time2);
     printf("Средняя длина очереди 1-го типа: %.6f\n", avg_queue_length1);
     printf("Средняя длина очереди 2-го типа: %.6f\n", avg_queue_length2);
+    int mem_used1 = get_queue1_size(sim), mem_used2 = get_queue2_size(sim), cur_max = 0;
+    if (mem_used1 * sizeof(request) > mem_used2 * sizeof(node))
+    {
+        cur_max = mem_used1 * sizeof(request);
+    }
+    else
+    {
+        cur_max = mem_used2 * sizeof(node);
+    }
+    if (cur_max > sim->max_used_mem)
+    {
+        sim->max_used_mem = cur_max;
+    }
+    printf("Максимальное количество использованной памяти: %d байт\n", sim->max_used_mem);
 }
 
-void print_sim_data(simulation *sim)
+void print_sim_data(simulation *sim, mode m)
 {
-    double avg_queue_time1 = sim->total_queue_time1 / sim->served1;
-    double avg_queue_time2 = (sim->served2 > 0) ? sim->total_queue_time2 / sim->served2 : 0.0;
-    double avg_queue_length1 = sim->total_queue_length1 / sim->current_time;
-    double avg_queue_length2 = sim->total_queue_length2 / sim->current_time;
     printf("\n=== РЕЗУЛЬТАТЫ СИМУЛЯЦИИ ===\n");
     print_core_data(sim);
     printf("Суммарное время простоя аппарата: %.6f\n", sim->idle_time);
     printf("Общее время симуляции: %.6f\n", sim->current_time);
 
-    printf("\n=== ПРОВЕРКА ===\n");
-    printf("λ1 * W1 = %.6f, L1 = %.6f\n",
-           (sim->served1 / sim->current_time) * avg_queue_time1, avg_queue_length1);
-    printf("λ2 * W2 = %.6f, L2 = %.6f\n",
-           (sim->served2 / sim->current_time) * avg_queue_time2, avg_queue_length2);
-
-    printf("\nВремя операций с очередью:\n");
-    printf("Среднее время push операций: %.10f нс\n", (double)sim->total_push_time / (double)(sim->served1 + get_queue1_size(sim) + sim->served2 + get_queue2_size(sim)));
-    printf("Суммарное время pop операций: %.10f нс\n", (double)sim->total_pop_time / (double)(sim->served1 + sim->served2));
+    if (m == PERF)
+    {
+        printf("\nВремя операций с очередью:\n");
+        printf("Среднее время push операций: %.10f нс\n", (double)sim->total_push_time / (double)(sim->served1 + get_queue1_size(sim) + sim->served2 + get_queue2_size(sim)));
+        printf("Среднее время pop операций: %.10f нс\n", (double)sim->total_pop_time / (double)(sim->served1 + sim->served2));
+    }
 }
 
 int select_next_event(simulation *sim)
@@ -264,7 +271,7 @@ error simulate(mode m, queue_type t)
     freed_history fr1 = { NULL, 0, 0 }, fr2 = { NULL, 0, 0 };
     queue_list ql1 = empty_queue(&fr1), ql2 = empty_queue(&fr2);
     queue_arr qa1 = empty_queue_arr(), qa2 = empty_queue_arr();
-    simulation sim = { 0, 0, 0, 0, 0, 0, 0, 0, 0, rand_val(gen_order1), rand_val(gen_order2), -1, { 0, 0, -1 }, 0, 0, 0, &ql1, &ql2, &qa1, &qa2, t };
+    simulation sim = { 0, 0, 0, 0, 0, 0, 0, 0, 0, rand_val(gen_order1), rand_val(gen_order2), -1, { 0, 0, -1 }, 0, 0, 0, &ql1, &ql2, &qa1, &qa2, t, 0 };
 
     struct timespec start_time, end_time;
 
@@ -337,6 +344,7 @@ error simulate(mode m, queue_type t)
                 sim.served1++;
                 if (sim.served1 % 100 == 0)
                 {
+                    printf("=== ==================== ===\n");
                     print_core_data(&sim);
                 }
             }
@@ -360,6 +368,6 @@ error simulate(mode m, queue_type t)
         }
         }
     }
-    print_sim_data(&sim);
+    print_sim_data(&sim, m);
     return 0;
 }

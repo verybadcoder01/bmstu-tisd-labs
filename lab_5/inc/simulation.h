@@ -27,6 +27,7 @@ typedef struct {
     queue_list *ql1, *ql2;
     queue_arr *qa1, *qa2;
     queue_type used_type;
+    int max_used_mem;
 } simulation;
 
 int validate_interval(interval ir);
@@ -45,7 +46,7 @@ unsigned long elapsed_time(const struct timespec *start, const struct timespec *
 
 void print_core_data(simulation *sim);
 
-void print_sim_data(simulation *sim);
+void print_sim_data(simulation *sim, mode m);
 
 error input_intervals(interval *gen_order1, interval *gen_order2, interval *process_order1, interval *process_order2);
 
