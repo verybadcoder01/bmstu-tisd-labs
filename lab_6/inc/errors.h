@@ -9,6 +9,7 @@ typedef enum {
     UNKNOWN_ACTION,
     WRONG_GPA_INPUT,
     WRONG_OUT_FILE,
+    PERF_TEST_ERROR,
 } error;
 
 void interface_printf(const char *format, ...);

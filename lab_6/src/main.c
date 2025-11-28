@@ -1,3 +1,4 @@
+#include "perf_test.h"
 #define _GNU_SOURCE
 #include "errors.h"
 #include "node.h"
@@ -35,8 +36,12 @@ void print_menu()
     interface_printf("6 - вывод в graphviz\n");
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    if (argc == 2 && !strcmp(argv[1], "p")){
+        error rc = run_perf_test();
+        return rc;
+    }
     menu_item action = -1;
     node_t *root = NULL;
     while (action)
@@ -83,7 +88,7 @@ int main(void)
                 return WRONG_GPA_INPUT;
             }
             scan_newlines(stdin);
-            error rc = tree_insert(&root, surname, gpa);
+            error rc = tree_insert(&root, comp_node_surname, surname, gpa);
             if (rc)
             {
                 if (rc == DUPLICATE_KEY)
@@ -122,7 +127,7 @@ int main(void)
                 return WRONG_INPUT;
             }
             surname[strcspn(surname, "\n")] = '\0';
-            error rc = tree_remove(&root, surname);
+            error rc = tree_remove(&root, comp_node_surname, surname);
             if (rc)
             {
                 if (rc == KEY_NOT_FOUND)
@@ -151,7 +156,7 @@ int main(void)
             }
             serialize_to_graphviz(root, fout_before);
             fclose(fout_before);
-            error rc = tree_remove_below(&root, 2.0);
+            error rc = tree_remove_below(&root, comp_node_surname, 2.0);
             if (rc)
             {
                 tree_delete(root);
@@ -185,7 +190,7 @@ int main(void)
             }
             surname[strcspn(surname, "\n")] = '\0';
             node_t *res = NULL;
-            error rc = tree_find(root, surname, &res);
+            error rc = tree_find(root, comp_node_surname, surname, &res);
             if (rc)
             {
                 if (rc == KEY_NOT_FOUND)

@@ -1,7 +1,6 @@
 #include "tree.h"
 #include "errors.h"
 #include "node.h"
-#include "stdlib.h"
 #include "string.h"
 #include <stdio.h>
 
@@ -39,7 +38,26 @@ void tree_walk(node_t *root, walk_order order)
     }
 }
 
-error tree_insert(node_t **root, char *surname, double gpa)
+int comp_node_surname(const node_t *n, const void *str)
+{
+    return strcmp(n->surname, (const char *)str);
+}
+
+int comp_node_gpa(const node_t *n, const void *gpa)
+{
+    double right = *((const double *)gpa);
+    if (n->gpa > right)
+    {
+        return 1;
+    }
+    else if (right > n->gpa)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+error tree_insert(node_t **root, comp_fn comp, char *surname, double gpa)
 {
     if (!*root)
     {
@@ -50,71 +68,70 @@ error tree_insert(node_t **root, char *surname, double gpa)
         }
         return 0;
     }
-    int cmp_val = strcmp((*root)->surname, surname);
+    int cmp_val = comp(*root, surname);
     if (!cmp_val)
     {
         return DUPLICATE_KEY;
     }
     if (cmp_val < 0)
     {
-        return tree_insert(&(*root)->left, surname, gpa);
+        return tree_insert(&(*root)->left, comp, surname, gpa);
     }
     else
     {
-        return tree_insert(&(*root)->right, surname, gpa);
+        return tree_insert(&(*root)->right, comp, surname, gpa);
     }
 }
 
-static node_t *find_min(node_t *root)
-{
-    while (root && root->left)
-    {
-        root = find_min(root->left);
-    }
-    return root;
-}
-
-error tree_remove(node_t **root, const char *surname)
+error tree_remove(node_t **root, comp_fn comp, const void *surname)
 {
     if (!root || !*root)
     {
         return KEY_NOT_FOUND;
     }
-    int cmp_val = strcmp((*root)->surname, surname);
+    int cmp_val = comp(*root, surname);
     if (cmp_val < 0)
     {
-        return tree_remove(&(*root)->left, surname);
+        return tree_remove(&(*root)->left, comp, surname);
     }
     else if (cmp_val > 0)
     {
-        return tree_remove(&(*root)->right, surname);
+        return tree_remove(&(*root)->right, comp, surname);
     }
     else
     {
-        if (!(*root)->left)
+        node_t *node_to_delete = *root;
+        if (!node_to_delete->left)
         {
-            node_t *tmp = (*root)->right;
-            node_delete(*root);
-            *root = tmp;
+            *root = node_to_delete->right;
+            node_delete(node_to_delete);
             return 0;
         }
-        else if (!(*root)->right)
+        else if (!node_to_delete->right)
         {
-            node_t *tmp = (*root)->left;
-            node_delete(*root);
-            *root = tmp;
+            *root = node_to_delete->left;
+            node_delete(node_to_delete);
             return 0;
         }
-        node_t *tmp = find_min((*root)->right);
-        char *surname_copy = strdup(tmp->surname);
-        free((*root)->surname);
-        (*root)->surname = surname_copy;
-        (*root)->gpa = tmp->gpa;
-        return tree_remove(&(*root)->right, tmp->surname);
+        else
+        {
+            node_t **successor_ptr = &node_to_delete->right;
+            while ((*successor_ptr)->left != NULL)
+            {
+                successor_ptr = &(*successor_ptr)->left;
+            }
+            node_t *successor = *successor_ptr;
+            *successor_ptr = successor->right;
+            successor->left = node_to_delete->left;
+            successor->right = node_to_delete->right;
+            *root = successor;
+            node_delete(node_to_delete);
+            return 0;
+        }
     }
 }
 
-error tree_remove_below(node_t **root, double gpa_bar)
+error tree_remove_below(node_t **root, comp_fn comp, double gpa_bar)
 {
     if (!root || !*root)
     {
@@ -123,7 +140,7 @@ error tree_remove_below(node_t **root, double gpa_bar)
     error rc = 0;
     if ((*root)->gpa < gpa_bar)
     {
-        rc = tree_remove(root, (*root)->surname);
+        rc = tree_remove(root, comp, (*root)->surname);
     }
     if (rc)
     {
@@ -131,24 +148,24 @@ error tree_remove_below(node_t **root, double gpa_bar)
     }
     if (*root)
     {
-        rc = tree_remove_below(&(*root)->left, gpa_bar);
+        rc = tree_remove_below(&(*root)->left, comp, gpa_bar);
         if (rc)
         {
             return rc;
         }
-        rc = tree_remove_below(&(*root)->right, gpa_bar);
+        rc = tree_remove_below(&(*root)->right, comp, gpa_bar);
         return rc;
     }
     return 0;
 }
 
-error tree_find(node_t *root, const char *surname, node_t **result)
+error tree_find(node_t *root, comp_fn comp, const void *surname, node_t **result)
 {
     if (!root)
     {
         return KEY_NOT_FOUND;
     }
-    int cmp_val = strcmp(root->surname, surname);
+    int cmp_val = comp(root, surname);
     if (!cmp_val)
     {
         *result = root;
@@ -156,11 +173,11 @@ error tree_find(node_t *root, const char *surname, node_t **result)
     }
     if (cmp_val < 0)
     {
-        return tree_find(root->left, surname, result);
+        return tree_find(root->left, comp, surname, result);
     }
     else
     {
-        return tree_find(root->right, surname, result);
+        return tree_find(root->right, comp, surname, result);
     }
 }
 
@@ -180,4 +197,30 @@ void serialize_to_graphviz(node_t *root, FILE *fout)
     fprintf(fout, "digraph BasicTree {\n");
     tree_to_graphviz(root, fout);
     fprintf(fout, "}\n");
+}
+
+size_t tree_to_sorted_array(node_t *root, char **surnames, double *gpas, size_t index)
+{
+    if (!root)
+    {
+        return index;
+    }
+
+    index = tree_to_sorted_array(root->left, surnames, gpas, index);
+
+    surnames[index] = root->surname;
+    gpas[index] = root->gpa;
+    index++;
+
+    index = tree_to_sorted_array(root->right, surnames, gpas, index);
+    return index;
+}
+
+int tree_depth(node_t *root) {
+    if (!root) {
+        return -1;
+    }
+    int dleft = tree_depth(root->left);
+    int dright = tree_depth(root->right);
+    return 1 + (dleft > dright ? dleft : dright);
 }
