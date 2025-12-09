@@ -138,7 +138,7 @@ error tree_remove_below(node_t **root, comp_fn comp, double gpa_bar)
         return 0;
     }
     error rc = 0;
-    if ((*root)->gpa < gpa_bar)
+    if ((*root)->gpa <= gpa_bar)
     {
         rc = tree_remove(root, comp, (*root)->surname);
     }

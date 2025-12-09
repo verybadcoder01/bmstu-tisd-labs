@@ -34,6 +34,4 @@ void serialize_to_graphviz(node_t *root, FILE *fout);
 
 size_t tree_to_sorted_array(node_t *root, char **surnames, double *gpas, size_t index);
 
-int tree_depth(node_t *root);
-
 #endif

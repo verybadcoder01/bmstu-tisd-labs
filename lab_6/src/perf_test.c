@@ -1,7 +1,8 @@
+#include <time.h>
 #define _GNU_SOURCE
-#include "perf_test.h"
 #include "errors.h"
 #include "node.h"
+#include "perf_test.h"
 #include "string.h"
 #include "time.h"
 #include "tree.h"
@@ -19,12 +20,17 @@ void generate_random_string(char *str, int length, int ind)
     snprintf(str, length + 1, "%0*d", length, ind);
 }
 
-void default_swap(void *a, void *b, size_t elem_size)
+static void memswap(void *a, void *b, size_t size)
 {
-    char temp[elem_size];
-    memcpy(temp, a, elem_size);
-    memcpy(a, b, elem_size);
-    memcpy(b, temp, elem_size);
+    char *ca = (char *)a;
+    char *cb = (char *)b;
+
+    for (size_t i = 0; i < size; i++)
+    {
+        char temp = ca[i];
+        ca[i] = cb[i];
+        cb[i] = temp;
+    }
 }
 
 void shuffle(void *array, size_t n_elems, size_t elem_size)
@@ -32,12 +38,10 @@ void shuffle(void *array, size_t n_elems, size_t elem_size)
     if (n_elems > 1)
     {
         char *base = (char *)array;
-        for (size_t i = 0; i < n_elems - 1; i++)
+        for (size_t i = n_elems - 1; i > 0; i--)
         {
-            size_t j = i + rand() / (RAND_MAX / (n_elems - i) + 1);
-            void *elem_i = base + i * elem_size;
-            void *elem_j = base + j * elem_size;
-            default_swap(elem_i, elem_j, elem_size);
+            size_t j = (size_t)((double)rand() / ((double)RAND_MAX + 1) * (i + 1));
+            memswap(base + i * elem_size, base + j * elem_size, elem_size);
         }
     }
 }
@@ -146,6 +150,44 @@ void graphviz_check(node_t *root_ideal, node_t *root_left, size_t size)
     free(filenames[1]);
 }
 
+error measure_worst_sort(int size)
+{
+    node_t *root = NULL;
+    struct timespec start, end;
+    char **dummy = malloc(sizeof(char *) * size);
+    double *dummy_gpa = malloc(sizeof(double) * size);
+    if (!dummy || !dummy_gpa)
+    {
+        tree_delete(root);
+        return ALLOC_ERROR;
+    }
+    unsigned long total_time = 0;
+    for (int run = 0; run < 15; ++run)
+    {
+        clock_gettime(CLOCK_MONOTONIC, &start);
+        for (int i = size - 1; i >= 0; --i)
+        {
+            error rc = tree_insert(&root, comp_node_gpa, "a", (double)i);
+            if (rc)
+            {
+                tree_delete(root);
+                free(dummy);
+                free(dummy_gpa);
+                return rc;
+            }
+        }
+        tree_to_sorted_array(root, dummy, dummy_gpa, 0);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        total_time += elapsed_time(&start, &end);
+        tree_delete(root);
+        root = NULL;
+    }
+    printf("Среднее время сортировки %d уже отсортированных элементов: %lf\n", size, ((double)total_time / (double)15) * 0.000001);
+    free(dummy);
+    free(dummy_gpa);
+    return 0;
+}
+
 error measure_sort(size_t size)
 {
     struct timespec start, end;
@@ -160,6 +202,7 @@ error measure_sort(size_t size)
         keys[i] = (double)i;
     }
     unsigned long total_time = 0;
+    shuffle(keys, size, sizeof(double));
     for (int run = 0; run < 10; ++run)
     {
         unsigned long cur_time = 0;
@@ -195,9 +238,8 @@ error measure_sort(size_t size)
         free(dummy_gpa);
         tree_delete(root);
         root = NULL;
-
     }
-    printf("Среднее время сортирвоки %zu элементов: %lf\n", size, (double)total_time / (double)10);
+    printf("Среднее время сортирвоки %zu элементов: %lf\n", size, ((double)total_time / (double)10) * 0.000001);
     free(keys);
     return 0;
 }
@@ -277,7 +319,8 @@ error run_perf_test()
         printf("Среднее время удаления по фамилии на %d вершинах в вырожденном дереве %lf, в идеальном %lf\n", sizes[i], avg_removal_left, avg_removal_ideal);
 
         // замер построения и удаления
-        unsigned long total_rebuild_and_remove_left = 0, total_rebuild_and_remove_ideal = 0;
+        unsigned long total_rebuild_time_left = 0, total_rebuild_time_ideal = 0;
+        unsigned long total_remove_left = 0, total_remove_ideal = 0;
         double *keys_gpa = malloc(sizeof(double) * sizes[i]), *result_gpa = malloc(sizeof(double) * sizes[i]);
         double *keys_gpa_shuffled = malloc(sizeof(double) * sizes[i]);
         if (!keys_gpa || !result_gpa || !keys_gpa_shuffled)
@@ -300,13 +343,16 @@ error run_perf_test()
             tree_delete(root_ideal);
             return PERF_TEST_ERROR;
         }
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        total_rebuild_time_left += elapsed_time(&start, &end);
+        clock_gettime(CLOCK_MONOTONIC, &start);
         for (int j = 0; j < sizes[i]; ++j)
         {
             double val = (double)keys_gpa_shuffled[j];
             rc = tree_remove(&root_left, comp_node_gpa, &val);
         }
         clock_gettime(CLOCK_MONOTONIC, &end);
-        total_rebuild_and_remove_left += elapsed_time(&start, &end);
+        total_remove_left += elapsed_time(&start, &end);
         // идеальное
         for (int j = 0; j < sizes[j]; ++j)
         {
@@ -320,16 +366,19 @@ error run_perf_test()
             tree_delete(root_ideal);
             return PERF_TEST_ERROR;
         }
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        total_rebuild_time_ideal += elapsed_time(&start, &end);
+        clock_gettime(CLOCK_MONOTONIC, &start);
         for (int j = 0; j < sizes[i]; ++j)
         {
             double val = (double)keys_gpa_shuffled[j];
             rc = tree_remove(&root_left, comp_node_gpa, &val);
         }
         clock_gettime(CLOCK_MONOTONIC, &end);
-        total_rebuild_and_remove_ideal += elapsed_time(&start, &end);
-        double avg_rebuild_left = (double)total_rebuild_and_remove_left / (double)sizes[i], avg_rebuild_ideal = (double)total_rebuild_and_remove_ideal / (double)sizes[i];
-        printf("Среднее время удаления по баллу (с учетом перестроения) на %d вершинах для вырожденного дерева %lf, для идеального %lf\n", sizes[i], avg_rebuild_left, avg_rebuild_ideal);
-
+        total_remove_ideal += elapsed_time(&start, &end);
+        double avg_remove_left = (double)total_remove_left / (double)sizes[i], avg_remove_ideal = (double)total_remove_ideal / (double)sizes[i];
+        printf("Время перестроения по баллу на %d вершинах для вырожденного дерева %zu, для идеального %zu\n", sizes[i], total_rebuild_time_left, total_rebuild_time_ideal);
+        printf("Среднее время удаления по баллу на %d вершинах для вырожденного дерева %lf, для идеального %lf\n", sizes[i], avg_remove_left, avg_remove_ideal);
         // очистка
         tree_delete(root_ideal);
         tree_delete(root_left);
@@ -349,6 +398,7 @@ error run_perf_test()
     for (int i = 0; i < 6; ++i)
     {
         measure_sort(sizes[i]);
+        measure_worst_sort(sizes[i]);
     }
     return 0;
 }

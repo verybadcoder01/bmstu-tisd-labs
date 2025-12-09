@@ -223,6 +223,7 @@ int main(int argc, char **argv)
         case GRAPHVIZ: {
             char *filename = NULL;
             size_t dummy = 0;
+            interface_printf("Введите имя выходного файла\n");
             if (getline(&filename, &dummy, stdin) == -1)
             {
                 interface_printf("Ошибка %d\n", WRONG_INPUT);
