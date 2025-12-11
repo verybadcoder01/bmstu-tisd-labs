@@ -1,0 +1,16 @@
+#ifndef ERRORS_H__
+#define ERRORS_H__
+
+typedef enum {
+    ALLOC_ERROR = 1,
+    DUPLICATE_KEY,
+    KEY_NOT_FOUND,
+    INPUT_ERROR,
+    WRONG_STRUCT_TYPE,
+    WRONG_TREE_ACTION,
+    WRONG_HT_ACTION,
+    WRONG_INPUT_FILE,
+    WRONG_FILE_CONTENT,
+} error;
+
+#endif
