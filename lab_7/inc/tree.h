@@ -15,7 +15,7 @@ error tree_insert(node_t **root, comp_fn comp, int data);
 
 error tree_remove(node_t **root, comp_fn comp, const void *data);
 
-error tree_find(node_t *root, comp_fn comp, const void *data);
+error tree_find(node_t *root, comp_fn comp, const void *data, int *cmp_count);
 
 typedef enum
 {

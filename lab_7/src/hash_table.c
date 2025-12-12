@@ -4,6 +4,7 @@
 #include "time.h"
 #include <stdbool.h>
 #include <stdlib.h>
+#include "math.h"
 
 // основная хеш-функция
 int hash_knuth_xor(const int key, const int m)
@@ -15,11 +16,17 @@ int hash_knuth_xor(const int key, const int m)
     return k % m;
 }
 
+int hash_mult(const int key, const int m) {
+    const unsigned int A = 2654435761U;
+    unsigned int k = (unsigned int)key;
+    return (int)((A * k) >> (32 - (int)log2(m))) % m;
+}
+
 // вторая хеш-функция, [1; m-1]
 int second_hash_func(const int key, const int mod)
 {
     unsigned int x = (unsigned int)key;
-    return 1 + (x % (mod - 1));
+    return 1 + ((x + mod) % (mod - 1));
 }
 
 int second_hash_probe(const int key, const int i, const int mod, hash_fn hash)
@@ -188,12 +195,13 @@ error ht_chain_remove(hash_table_chain *ht_chain, int key)
     return rc;
 }
 
-error ht_chain_find(hash_table_chain *ht_chain, int key)
+error ht_chain_find(hash_table_chain *ht_chain, int key, int *cmp_count)
 {
     int hash_ind = ht_chain->hash_func(key, ht_chain->size);
     htable_node_t *head = ht_chain->elems[hash_ind];
     for (; head; head = head->next)
     {
+        (*cmp_count)++;
         if (head->key == key)
         {
             return 0;
@@ -238,7 +246,7 @@ void ht_chain_delete(hash_table_chain *ht_chain)
     ht_chain->count = 0;
 }
 
-error ht_open_init(hash_table_open *ht_open, int size, int max_probe_length,
+error ht_open_init(hash_table_open *ht_open, int size, double max_load_factor,
                    hash_fn main_func, hash_fn hash_func2, probe_fn probe_func)
 {
     int table_size = next_prime(size);
@@ -259,7 +267,8 @@ error ht_open_init(hash_table_open *ht_open, int size, int max_probe_length,
     ht_open->main_func = main_func;
     ht_open->hash_func2 = hash_func2;
     ht_open->probe_func = probe_func;
-    ht_open->max_probe_length = max_probe_length;
+    ht_open->max_load_factor = max_load_factor;
+    ht_open->max_probe_length = (int)log2(table_size);
     return 0;
 }
 
@@ -309,6 +318,9 @@ error ht_open_insert(hash_table_open *ht_open, int key)
     ht_open->elems[current_ind].key = key;
     ht_open->elems[current_ind].is_occupied = true;
     ht_open->count++;
+    if ((double)ht_open->count / (double)ht_open->size > ht_open->max_load_factor){
+        rc = ht_open_rehash(ht_open);
+    }
     return rc;
 }
 
@@ -317,7 +329,7 @@ error ht_open_remove(hash_table_open *ht_open, int key)
     int hash_ind = ht_open->main_func(key, ht_open->size);
     int try = 1;
     int current_ind = hash_ind;
-    while (try < ht_open->max_probe_length)
+    while (try < ht_open->size)
     {
         if (ht_open->elems[current_ind].key == key && ht_open->elems[current_ind].is_occupied)
         {
@@ -336,15 +348,16 @@ error ht_open_remove(hash_table_open *ht_open, int key)
     return KEY_NOT_FOUND;
 }
 
-error ht_open_find(hash_table_open *ht_open, int key)
+error ht_open_find(hash_table_open *ht_open, int key, int *cmp_count)
 {
     int hash_ind = ht_open->main_func(key, ht_open->size);
     int try = 1;
     int current_ind = hash_ind;
-    while (try < ht_open->max_probe_length)
+    while (try < ht_open->size)
     {
         if (ht_open->elems[current_ind].key == key && ht_open->elems[current_ind].is_occupied)
         {
+            *cmp_count = try;
             return 0;
         }
         int probe_offset = ht_open->probe_func(key, try, ht_open->size, ht_open->hash_func2);
@@ -355,6 +368,7 @@ error ht_open_find(hash_table_open *ht_open, int key)
         }
         try++;
     }
+    *cmp_count = try;
     return KEY_NOT_FOUND;
 }
 
@@ -371,6 +385,7 @@ error ht_open_rehash(hash_table_open *ht_open)
 
     ht_open->elems = buf;
     ht_open->size = nsize;
+    ht_open->max_probe_length++;
     ht_open->count = 0;
     for (int i = 0; i < old_size; ++i)
     {

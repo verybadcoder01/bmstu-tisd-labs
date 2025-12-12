@@ -6,6 +6,7 @@
 #include "tree.h"
 #include "utils.h"
 #include <stdio.h>
+#include "perf_test.h"
 
 error handle_tree()
 {
@@ -102,14 +103,15 @@ error handle_tree()
                 continue;
             }
             scan_newlines(stdin);
-            error rc = tree_find(root, comp_node_data, &num);
+            int cmp_count = 0;
+            error rc = tree_find(root, comp_node_data, &num, &cmp_count);
             if (rc)
             {
                 printf("Ключ не найден!\n");
             }
             else
             {
-                printf("Ключ найден!\n");
+                printf("Ключ найден! Потребовалось %d сравнений\n", cmp_count);
             }
             break;
         }
@@ -175,7 +177,7 @@ error handle_ht_open()
                 printf("Ошибка %d\n", WRONG_FILE_CONTENT);
                 continue;
             }
-            rc = ht_open_init(&ht_open, n_count, MAX_PROBE_LENGTH, hash_knuth_xor, second_hash_func, second_hash_probe);
+            rc = ht_open_init(&ht_open, n_count, MAX_OPEN_LOAD_FACTOR, hash_knuth_xor, second_hash_func, second_hash_probe);
             if (rc)
             {
                 printf("Ошибка %d\n", rc);
@@ -252,14 +254,15 @@ error handle_ht_open()
                 continue;
             }
             scan_newlines(stdin);
-            error rc = ht_open_find(&ht_open, num);
+            int cmp_count = 0;
+            error rc = ht_open_find(&ht_open, num, &cmp_count);
             if (rc)
             {
                 printf("Ключ не найден!\n");
             }
             else
             {
-                printf("Ключ найден!\n");
+                printf("Ключ найден! Потребовалось %d сравнений\n", cmp_count);
             }
             break;
         }
@@ -384,14 +387,15 @@ error handle_ht_chain()
                 continue;
             }
             scan_newlines(stdin);
-            error rc = ht_chain_find(&ht_chain, num);
+            int cmp_count = 0;
+            error rc = ht_chain_find(&ht_chain, num, &cmp_count);
             if (rc)
             {
                 printf("Ключ не найден!\n");
             }
             else
             {
-                printf("Ключ найден!\n");
+                printf("Ключ найден! Потребовалось %d сравнений\n", cmp_count);
             }
             break;
         }
@@ -408,8 +412,15 @@ error handle_ht_chain()
     return 0;
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    if (argc == 2 && !strcmp(argv[1], "p")){
+        error rc = run_perf_test();
+        if (rc){
+            printf("Ошибка %d\n", rc);
+        }
+        return rc;
+    }
     print_menu_struct();
     struct_type st;
     if (scanf("%d", (int *)(&st)) != 1)

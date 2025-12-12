@@ -198,12 +198,13 @@ error tree_remove(node_t **root, comp_fn comp, const void *data)
     return 0;
 }
 
-error tree_find(node_t *root, comp_fn comp, const void *data)
+error tree_find(node_t *root, comp_fn comp, const void *data, int *cmp_count)
 {
     if (!root)
     {
         return KEY_NOT_FOUND;
     }
+    (*cmp_count)++;
     int cmp_val = comp(root, data);
     if (!cmp_val)
     {
@@ -211,11 +212,11 @@ error tree_find(node_t *root, comp_fn comp, const void *data)
     }
     if (cmp_val < 0)
     {
-        return tree_find(root->left, comp, data);
+        return tree_find(root->left, comp, data, cmp_count);
     }
     else
     {
-        return tree_find(root->right, comp, data);
+        return tree_find(root->right, comp, data, cmp_count);
     }
 }
 
