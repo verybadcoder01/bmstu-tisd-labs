@@ -213,6 +213,7 @@ error ht_chain_find(hash_table_chain *ht_chain, int key, int *cmp_count)
 void ht_chain_print(hash_table_chain *ht_chain)
 {
     printf("Хэш-таблица:\n");
+    printf("Выделенный размер: %d\n", ht_chain->size);
     for (int i = 0; i < ht_chain->size; ++i)
     {
         if (!ht_chain->elems[i])
@@ -416,6 +417,7 @@ error ht_open_rehash(hash_table_open *ht_open)
 void ht_open_print(hash_table_open *ht_open)
 {
     printf("Хэш-таблица в формате [ключ; значение хэш-функции]\n");
+    printf("Выделенный размер: %d\n", ht_open->size);
     for (int i = 0; i < ht_open->size; ++i)
     {
         if (ht_open->elems[i].is_occupied)
@@ -424,6 +426,7 @@ void ht_open_print(hash_table_open *ht_open)
                    ht_open->main_func(ht_open->elems[i].key, ht_open->size));
         }
     }
+    printf("\n");
 }
 
 void ht_open_delete(hash_table_open *ht_open)
