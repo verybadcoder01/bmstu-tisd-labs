@@ -330,6 +330,10 @@ error serialize_euler_path_to_dot(graph *gr, vert_list *path, const char *filena
     fprintf(file, "    graph [splines=true];\n");
     fprintf(file, "    node [shape=circle, style=filled];\n\n");
     fprintf(file, "    // Vertices\n");
+    int offset = 2;
+    if (path->vertices[0] == path->vertices[path->size - 1]){
+        offset = 1;
+    }
     for (int i = 0; i < gr->size; i++)
     {
         bool in_path = false;
@@ -347,7 +351,7 @@ error serialize_euler_path_to_dot(graph *gr, vert_list *path, const char *filena
             {
                 fprintf(file, "    %d [fillcolor=green]; // Start vertex\n", i);
             }
-            else if (i == path->vertices[path->size - 2])
+            else if (i == path->vertices[path->size - offset])
             {
                 fprintf(file, "    %d [fillcolor=green]; // End vertex\n", i);
             }
